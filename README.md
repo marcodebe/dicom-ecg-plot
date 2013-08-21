@@ -1,8 +1,8 @@
-dcm_ecg2pdf
-===========
-
-![ECG Dicom Convert][logo]
 [logo]: https://raw.github.com/marcodebe/dicomecg_convert/master/images/logo.png
+![ECG Dicom Convert][logo]
+
+dcm_ecgconvert
+==============
 
 
 Convert a Dicom ECG (waveform) file to PDF
