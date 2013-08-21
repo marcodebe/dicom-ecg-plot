@@ -58,3 +58,41 @@ Work in progress, we need:
  * different layouts
  * exception handling
  * ...
+
+
+Structure of DICOM Waveform
+---------------------------
+```
+       Series
+          |
+ contains | (1,n)
+          |
+          |
+          v
+       Waveform         * Waveform Attriubutes
+          |                 Time of Acquisition
+ contains | (1,n)           Acquisition Context
+          |                 Annotation
+          |
+          v
+    Multiplex Group     * Multiplex Group Attributes
+          |                 Number of Channels
+ contains | (1,n)           Sampling Frequenciy
+          |                 Timing
+          |
+          v
+       Channel          * Channel Definition Attributes
+          |                 Channel Source
+          |                   Metric
+          |                   Anatomic Location(s)
+          |                   Function
+ contains | (1,n)             Tecnique
+          |                 Channel Sensitivity
+          |                 Baseline
+          |                 Skew
+          |                 Filter Charcteristics
+          |
+          v
+        Sample
+
+```
