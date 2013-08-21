@@ -90,7 +90,7 @@ Structure of DICOM Waveform
           |                 Channel Sensitivity
           |                 Baseline
           |                 Skew
-          |                 Filter Charcteristics
+          |                 Filter Characteristics
           |
           v
         Sample
