@@ -69,7 +69,7 @@ Structure of DICOM Waveform
           |
           |
           v
-       Waveform         * Waveform Attriubutes
+       Waveform         * Waveform Attributes
           |                 Time of Acquisition
  contains | (1,n)           Acquisition Context
           |                 Annotation
