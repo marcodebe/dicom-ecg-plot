@@ -1,9 +1,17 @@
+#!/usr/bin/env python
+
+"""
+Convert 12-lead ECG Dicom waveform into PDF, png, etc...
+"""
+
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
 import numpy as np
 import dicom
 from sys import argv
 
+
+__author__ = "Marco De Benedetto <debe@galliera.it>"
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyquist_freq = 0.5 * fs
