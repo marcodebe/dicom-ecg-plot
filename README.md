@@ -14,7 +14,7 @@ python ecgconvert.py sample_files/anonymous_ecg.dcm
 
 The output is in out.pdf
 
-The sample file is a 12-lead ECG produced by Mortara equipement.
+The sample file is a 12-lead ECG produced by Mortara equipment.
 
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
