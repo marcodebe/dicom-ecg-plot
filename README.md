@@ -17,7 +17,7 @@ You can install the corresponding packages from your distribution or in a virtua
 
 ### Without virtualenv
 ```bash
-apt-get install python-matplotlib python-dicom python-scipy python-numpy
+sudo apt-get install python-matplotlib python-dicom python-scipy python-numpy
 git clone git@github.com:marcodebe/dicomecg_convert.git
 ```
 
