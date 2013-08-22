@@ -117,14 +117,10 @@ class ECG(object):
 
         return signals
 
-    def load_data(self):
-        ecg_dicom = dicom.read_file(self.filename)
-        sequence = ecg_dicom.WaveformSequence
-        return self.get_signals(sequence[0])
-
     def __init__(self, filename):
         self.filename = filename
-        self.signals = self.load_data()
+        self.dicom = dicom.read_file(self.filename)
+        self.signals = self.get_signals(self.dicom.WaveformSequence[0])
         self.fig, self.ax = self.create_figure()
 
     def draw_grid(self):
@@ -149,11 +145,28 @@ class ECG(object):
         self.ax.set_xticklabels([])
         self.ax.set_yticklabels([])
 
+    def print_info(self):
+
+        pat_name = self.dicom.PatientName.replace('^', ' ')
+        pat_id = self.dicom.PatientID
+        pat_sex = self.dicom.PatientSex
+        text_y = self.height+23
+
+        from datetime import datetime
+        ecg_date_str = (self.dicom.InstanceCreationDate +
+                        self.dicom.InstanceCreationTime)
+        ecg_date = datetime.strftime(datetime.strptime(ecg_date_str,
+                                                       '%Y%m%d%H%M%S'),
+                                     '%d %b %Y %H:%M')
+        patient_str = "%s (%s) sex: %s" % (pat_name, pat_id, pat_sex)
+        self.ax.text(0, text_y, patient_str, fontsize=12)
+        self.ax.text(0, text_y-5, "ECG date: " + ecg_date, fontsize=10)
+
     def plot(self, outputfile):
 
         self.signals.reverse()
 
-        premax = delta = 0  # premin = 0
+        premax = delta = 0
         delta = 3
         for num, signal in enumerate(self.signals):
             delta += 1 + 10 * (premax - signal.min())
@@ -171,4 +184,5 @@ if __name__ == '__main__':
     arguments = docopt(__doc__, version='ECG Convert 0.1')
     ecg = ECG(arguments['<inputfile>'])
     ecg.draw_grid()
+    ecg.print_info()
     ecg.plot(arguments['-o'])
