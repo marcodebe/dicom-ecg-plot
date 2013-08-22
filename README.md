@@ -5,6 +5,28 @@ Dicom ECG Conversion
 ====================
 Convert a Dicom ECG (waveform) file to PDF
 
+Usage
+-----
+```bash
+python ecgconvert.py input.dcm -o ouput.pdf
+```
+
+The ouput format is deduced from the extension of the filename.
+
+Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
+svg, svgz, tif, tiff.
+
+The sample file is a 12-lead ECG dicom file produced by Mortara equipment.
+
+The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
+
+Work in progress, we need:
+ * save in more formats (it's about to change the extension of output file name)
+ * print textual info (patient name, etc.) in the header
+ * different layouts
+ * exception handling
+ * ...
+
 Install
 -------
 The python library dependencies are:
@@ -39,29 +61,6 @@ pip install matplotlib
 pip install cython
 pip install git+http://github.com/scipy/scipy/
 ```
-
-Usage
------
-```bash
-python ecgconvert.py input.dcm -o ouput.pdf
-```
-
-The ouput format is deduced from the extension of the filename.
-
-Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
-svg, svgz, tif, tiff.
-
-The sample file is a 12-lead ECG dicom file produced by Mortara equipment.
-
-The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
-
-Work in progress, we need:
- * save in more formats (it's about to change the extension of output file name)
- * print textual info (patient name, etc.) in the header
- * different layouts
- * exception handling
- * ...
-
 
 Structure of DICOM Waveform
 ---------------------------
