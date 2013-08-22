@@ -43,10 +43,13 @@ pip install git+http://github.com/scipy/scipy/
 Usage
 -----
 ```bash
-python ecgconvert.py sample_files/anonymous_ecg.dcm
+python ecgconvert.py input.dcm -o ouput.pdf
 ```
 
-The output is in out.pdf
+The ouput format is deduced from the extension of the filename.
+
+Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
+svg, svgz, tif, tiff.
 
 The sample file is a 12-lead ECG dicom file produced by Mortara equipment.
 
