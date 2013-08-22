@@ -1,17 +1,30 @@
 #!/usr/bin/env python
 
-"""
-Convert 12-lead ECG Dicom waveform into PDF, png, etc...
+"""ECG Conversion Tool
+
+Usage:
+    ecgconvert.py <inputfile> -o <outputfile>
+
+Options:
+    -h, --help      This help
+    <inputfile>     Input dicom file
+    -o <outpufile>  Output file
+
+The output format is deduced from the extension of the filename.
+
+Supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
+                   svg, svgz, tif, tiff.
 """
 
+from docopt import docopt
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
 import numpy as np
 import dicom
-from sys import argv
 
+__author__ = "Marco De Benedetto"
+__email__ = "debe@galliera.it"
 
-__author__ = "Marco De Benedetto <debe@galliera.it>"
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyquist_freq = 0.5 * fs
@@ -37,25 +50,33 @@ class ECG(object):
 
     paper_w, paper_h = 297.0, 210.0
 
+    # Dimensions in mm of plot area
     width = 250
     height = 170
     margin_left = margin_right = .5 * (paper_w - width)
     margin_bottom = 10
 
+    # Normalized in [0, 1]
     left = margin_left/paper_w
     right = left+width/paper_w
     bottom = margin_bottom/paper_h
     top = bottom+height/paper_h
 
     def create_figure(self):
+        """
+        Prepare figure and axes
+        """
+
         # Init figure and axes
-        self.fig = plt.figure(tight_layout=False)
-        self.ax = self.fig.add_subplot(1, 1, 1)
+        fig = plt.figure(tight_layout=False)
+        ax = fig.add_subplot(1, 1, 1)
         # ax.set_frame_on(False)
-        self.fig.subplots_adjust(left=self.left, right=self.right,
-                                 top=self.top, bottom=self.bottom)
-        self.ax.set_ylim([0, self.height])
-        self.ax.set_xlim([0, self.samples-1])
+        fig.subplots_adjust(left=self.left, right=self.right,
+                            top=self.top, bottom=self.bottom)
+        ax.set_ylim([0, self.height])
+        # we want to plot N points, where N=number of samples
+        ax.set_xlim([0, self.samples-1])
+        return fig, ax
 
     def get_signals(self, sequence_item):
         """
@@ -66,6 +87,7 @@ class ECG(object):
         channel_definitions = sequence_item.ChannelDefinitionSequence
         wavewform_data = sequence_item.WaveformData
         channels_no = sequence_item.NumberOfWaveformChannels
+
         self.samples = sequence_item.NumberOfWaveformSamples
 
         signals = []
@@ -98,12 +120,12 @@ class ECG(object):
     def load_data(self):
         ecg_dicom = dicom.read_file(self.filename)
         sequence = ecg_dicom.WaveformSequence
-        self.signals = self.get_signals(sequence[0])
+        return self.get_signals(sequence[0])
 
     def __init__(self, filename):
         self.filename = filename
-        self.load_data()
-        self.create_figure()
+        self.signals = self.load_data()
+        self.fig, self.ax = self.create_figure()
 
     def draw_grid(self):
 
@@ -127,7 +149,7 @@ class ECG(object):
         self.ax.set_xticklabels([])
         self.ax.set_yticklabels([])
 
-    def plot(self):
+    def plot(self, outputfile):
 
         self.signals.reverse()
 
@@ -138,13 +160,15 @@ class ECG(object):
             self.ax.plot(10.0*signal+delta, linewidth=0.6, color='black',
                          antialiased=True, zorder=10)
             premax = signal.max()
-            #premin = signal.min()
 
+        # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
-        plt.savefig('out.pdf')
+
+        plt.savefig(outputfile, dpi=300)
 
 if __name__ == '__main__':
 
-    ecg = ECG(argv[1])
+    arguments = docopt(__doc__, version='ECG Convert 0.1')
+    ecg = ECG(arguments['<inputfile>'])
     ecg.draw_grid()
-    ecg.plot()
+    ecg.plot(arguments['-o'])
