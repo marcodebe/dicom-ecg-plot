@@ -16,8 +16,6 @@ The ouput format is deduced from the extension of the filename.
 Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
 svg, svgz, tif, tiff.
 
-The sample file is a 12-lead ECG dicom file produced by Mortara equipment.
-
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
 Work in progress, we need:
@@ -25,6 +23,9 @@ Work in progress, we need:
  * different layouts
  * exception handling
  * ...
+
+The sample file is a 12-lead ECG anonymized  dicom file produced
+by Mortara equipment and so are all the ECG files I have to test the program.
 
 Install
 -------
