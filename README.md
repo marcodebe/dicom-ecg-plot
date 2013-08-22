@@ -3,7 +3,7 @@
 
 Dicom ECG Conversion
 ====================
-Convert a Dicom ECG (waveform) file to PDF
+Convert Dicom ECG (waveform) to PDF, PNG, etc.
 
 Usage
 -----
@@ -21,7 +21,7 @@ The sample file is a 12-lead ECG dicom file produced by Mortara equipment.
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
 Work in progress, we need:
- * print textual info (patient name, etc.) in the header
+ * print textual info (patient and wave info)
  * different layouts
  * exception handling
  * ...
