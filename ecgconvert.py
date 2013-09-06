@@ -21,13 +21,14 @@ from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
 import numpy as np
 import dicom
+import struct
 
 __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyquist_freq = 0.5 * fs
+    nyquist_freq = .5 * fs
     low = lowcut / nyquist_freq
     high = highcut / nyquist_freq
     b, a = butter(order, [low, high], btype='band')
@@ -38,12 +39,6 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     y = lfilter(b, a, data)
     return y
-
-
-def norm(x, max_value):
-    sgn = lambda x: lambda y: x-y > 0 and 1 or -1
-    norm = lambda y: lambda x: x % (sgn(y)(x) * y)
-    return norm(max_value)(x)
 
 
 class ECG(object):
@@ -78,7 +73,7 @@ class ECG(object):
         ax.set_xlim([0, self.samples-1])
         return fig, ax
 
-    def get_signals(self, sequence_item):
+    def _signals(self, sequence_item):
         """
         sequence_item := dicom.dataset.FileDataset.WaveformData[n]
         Return a list of signals.
@@ -86,13 +81,12 @@ class ECG(object):
 
         channel_definitions = sequence_item.ChannelDefinitionSequence
         wavewform_data = sequence_item.WaveformData
-        channels_no = sequence_item.NumberOfWaveformChannels
-
+        self.channels_no = sequence_item.NumberOfWaveformChannels
         self.samples = sequence_item.NumberOfWaveformSamples
 
         signals = []
-        factor = np.zeros(channels_no) + 1
-        for idx in range(channels_no):
+        factor = np.zeros(self.channels_no) + 1
+        for idx in range(self.channels_no):
             signals.append([])
 
             definition = channel_definitions[idx]
@@ -101,12 +95,13 @@ class ECG(object):
                     float(definition.ChannelSensitivity) *
                     float(definition.ChannelSensitivityCorrectionFactor))
 
-        for idx in xrange(0, len(wavewform_data), 2):
-            channel = int((idx/2) % channels_no)
-            signals[channel].append(factor[channel] *
-                                    norm(ord(wavewform_data[idx]) +
-                                         256 * ord(wavewform_data[idx+1]),
-                                         2**15))
+        signals = np.asarray(
+            struct.unpack('<' + str(len(wavewform_data)/2) + 'h',
+                          wavewform_data), dtype=np.float32).reshape(
+                              self.samples, self.channels_no).transpose()
+
+        for channel in range(self.channels_no):
+            signals[channel] *= factor[channel]
 
         low = .05
         high = 40.0
@@ -120,7 +115,7 @@ class ECG(object):
     def __init__(self, filename):
         self.filename = filename
         self.dicom = dicom.read_file(self.filename)
-        self.signals = self.get_signals(self.dicom.WaveformSequence[0])
+        self.signals = self._signals(self.dicom.WaveformSequence[0])
         self.fig, self.ax = self.create_figure()
 
     def draw_grid(self):
@@ -164,13 +159,11 @@ class ECG(object):
 
     def plot(self, outputfile):
 
-        self.signals.reverse()
-
         premax = delta = 0
         delta = 3
-        for num, signal in enumerate(self.signals):
+        for num, signal in enumerate(self.signals[::-1]):
             delta += 1 + 10 * (premax - signal.min())
-            self.ax.plot(10.0*signal+delta, linewidth=0.6, color='black',
+            self.ax.plot(10.0*signal+delta, linewidth=.6, color='black',
                          antialiased=True, zorder=10)
             premax = signal.max()
 
