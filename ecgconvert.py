@@ -73,31 +73,23 @@ class ECG(object):
         ax.set_xlim([0, self.samples-1])
         return fig, ax
 
-    def _signals(self, sequence_item):
+    def _signals(self):
         """
         sequence_item := dicom.dataset.FileDataset.WaveformData[n]
         Return a list of signals.
         """
 
-        channel_definitions = sequence_item.ChannelDefinitionSequence
-        wavewform_data = sequence_item.WaveformData
-        self.channels_no = sequence_item.NumberOfWaveformChannels
-        self.samples = sequence_item.NumberOfWaveformSamples
-
-        signals = []
         factor = np.zeros(self.channels_no) + 1
         for idx in range(self.channels_no):
-            signals.append([])
-
-            definition = channel_definitions[idx]
+            definition = self.channel_definitions[idx]
             if definition.get('ChannelSensitivity'):
                 factor[idx] = (
                     float(definition.ChannelSensitivity) *
                     float(definition.ChannelSensitivityCorrectionFactor))
 
         signals = np.asarray(
-            struct.unpack('<' + str(len(wavewform_data)/2) + 'h',
-                          wavewform_data), dtype=np.float32).reshape(
+            struct.unpack('<' + str(len(self.wavewform_data)/2) + 'h',
+                          self.wavewform_data), dtype=np.float32).reshape(
                               self.samples, self.channels_no).transpose()
 
         for channel in range(self.channels_no):
@@ -115,7 +107,15 @@ class ECG(object):
     def __init__(self, filename):
         self.filename = filename
         self.dicom = dicom.read_file(self.filename)
-        self.signals = self._signals(self.dicom.WaveformSequence[0])
+
+        sequence_item = self.dicom.WaveformSequence[0]
+
+        self.channel_definitions = sequence_item.ChannelDefinitionSequence
+        self.wavewform_data = sequence_item.WaveformData
+        self.channels_no = sequence_item.NumberOfWaveformChannels
+        self.samples = sequence_item.NumberOfWaveformSamples
+
+        self.signals = self._signals()
         self.fig, self.ax = self.create_figure()
 
     def draw_grid(self):
