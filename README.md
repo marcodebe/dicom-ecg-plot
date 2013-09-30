@@ -8,7 +8,7 @@ Convert Dicom ECG (waveform) to PDF, PNG, etc.
 Usage
 -----
 ```bash
-python ecgconvert.py input.dcm -o ouput.pdf
+python ecgconvert.py <inputfile> [--layout=LAYOUT] --output=FILE
 ```
 
 The ouput format is deduced from the extension of the filename.
@@ -17,6 +17,10 @@ Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
 svg, svgz, tif, tiff.
 
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
+
+LAYOUT can be one of: 3X4\_1, 4X3\_1, 12X1 (default: 3X4_1)
+
+New layouts can be defined adding the corresponding matrix in LAYOUT dictionary (see code).
 
 Work in progress, we need:
  * print textual info (patient and wave info)
