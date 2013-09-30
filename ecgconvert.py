@@ -3,12 +3,15 @@
 """ECG Conversion Tool
 
 Usage:
-    ecgconvert.py <inputfile> -o <outputfile>
+    ecgconvert.py <inputfile> [--layout=LAYOUT] --output=FILE
 
 Options:
-    -h, --help      This help
-    <inputfile>     Input dicom file
-    -o <outpufile>  Output file
+    -h, --help                 This help
+    <inputfile>                Input dicom file
+    -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1]
+    -o FILE --output=FILE      Output file
+
+Valid layouts are: 3X4_1, 4X3_1, 12X1
 
 The output format is deduced from the extension of the filename.
 
@@ -17,6 +20,7 @@ Supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
 """
 
 from docopt import docopt
+from datetime import datetime
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
 import numpy as np
@@ -27,18 +31,42 @@ __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
 
 
-def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyquist_freq = .5 * fs
+LAYOUT = {'3X4_1': [[0, 3, 6, 9],
+                    [1, 4, 7, 10],
+                    [2, 5, 8, 11],
+                    [1]],
+          '4X3_1': [[0, 3, 6],
+                    [9, 10, 11],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [1]],
+          '12X1': [[0],
+                   [1],
+                   [2],
+                   [3],
+                   [4],
+                   [5],
+                   [6],
+                   [7],
+                   [8],
+                   [9],
+                   [10],
+                   [11]]}
+
+plt.rc('text', usetex=True)
+
+
+def butter_bandpass(lowcut, highcut, size, order=5):
+    nyquist_freq = .5 * size
     low = lowcut / nyquist_freq
     high = highcut / nyquist_freq
-    b, a = butter(order, [low, high], btype='band')
-    return b, a
+    num, denom = butter(order, [low, high], btype='band')
+    return num, denom
 
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
+def butter_bandpass_filter(data, lowcut, highcut, size, order):
+    num, denom = butter_bandpass(lowcut, highcut, size, order=order)
+    return lfilter(num, denom, data)
 
 
 class ECG(object):
@@ -46,8 +74,8 @@ class ECG(object):
     paper_w, paper_h = 297.0, 210.0
 
     # Dimensions in mm of plot area
-    width = 250
-    height = 170
+    width = 250.0
+    height = 170.0
     margin_left = margin_right = .5 * (paper_w - width)
     margin_bottom = 10
 
@@ -57,6 +85,20 @@ class ECG(object):
     bottom = margin_bottom/paper_h
     top = bottom+height/paper_h
 
+    def __init__(self, filename):
+        self.filename = filename
+        self.dicom = dicom.read_file(self.filename)
+
+        sequence_item = self.dicom.WaveformSequence[0]
+
+        self.channel_definitions = sequence_item.ChannelDefinitionSequence
+        self.wavewform_data = sequence_item.WaveformData
+        self.channels_no = sequence_item.NumberOfWaveformChannels
+        self.samples = sequence_item.NumberOfWaveformSamples
+
+        self.signals = self._signals()
+        self.fig, self.axis = self.create_figure()
+
     def create_figure(self):
         """
         Prepare figure and axes
@@ -64,14 +106,14 @@ class ECG(object):
 
         # Init figure and axes
         fig = plt.figure(tight_layout=False)
-        ax = fig.add_subplot(1, 1, 1)
-        # ax.set_frame_on(False)
+        axes = fig.add_subplot(1, 1, 1)
+        # axes.set_frame_on(False)
         fig.subplots_adjust(left=self.left, right=self.right,
                             top=self.top, bottom=self.bottom)
-        ax.set_ylim([0, self.height])
+        axes.set_ylim([0, self.height])
         # we want to plot N points, where N=number of samples
-        ax.set_xlim([0, self.samples-1])
-        return fig, ax
+        axes.set_xlim([0, self.samples-1])
+        return fig, axes
 
     def _signals(self):
         """
@@ -97,48 +139,70 @@ class ECG(object):
 
         low = .05
         high = 40.0
-        for i, s in enumerate(signals):
+        for i, signal in enumerate(signals):
             # micro to milli volt
-            signals[i] = butter_bandpass_filter(np.asarray(s),
+            signals[i] = butter_bandpass_filter(np.asarray(signal),
                                                 low, high, 1000, order=1)/1000
 
         return signals
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.dicom = dicom.read_file(self.filename)
-
-        sequence_item = self.dicom.WaveformSequence[0]
-
-        self.channel_definitions = sequence_item.ChannelDefinitionSequence
-        self.wavewform_data = sequence_item.WaveformData
-        self.channels_no = sequence_item.NumberOfWaveformChannels
-        self.samples = sequence_item.NumberOfWaveformSamples
-
-        self.signals = self._signals()
-        self.fig, self.ax = self.create_figure()
-
     def draw_grid(self):
 
-        self.ax.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
-        self.ax.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
-        self.ax.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
-        self.ax.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
+        self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
+        self.axis.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
+        self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
+        self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
         linewidth = {'minor': .2, 'major': .6}
+        alpha = 1
 
-        for axis in 'x', 'y':
-            for which in 'major', 'minor':
-                self.ax.grid(which=which, axis=axis,
-                             linewidth=linewidth[which],
-                             linestyle='-', color=color[which], alpha=.5)
-                self.ax.tick_params(which=which, axis=axis, color=color[which],
-                                    bottom='off', top='off',
-                                    left='off', right='off')
+        for axe in 'x', 'y':
+            for which in 'major', :  #  'minor':
+                self.axis.grid(which=which, axis=axe,
+                               linewidth=linewidth[which],
+                               linestyle='-', color=color[which], alpha=alpha)
+                self.axis.tick_params(which=which, axis=axe,
+                                      color=color[which],
+                                      bottom='off', top='off',
+                                      left='off', right='off')
 
-        self.ax.set_xticklabels([])
-        self.ax.set_yticklabels([])
+        self.axis.set_xticklabels([])
+        self.axis.set_yticklabels([])
+
+    def legend(self):
+
+        ecgdata = {}
+        for was in self.dicom.WaveformAnnotationSequence:
+            if was.get('ConceptNameCodeSequence'):
+                cncs = was.ConceptNameCodeSequence[0]
+                if cncs.CodeMeaning in ('QT Interval',
+                                        'QTc Interval',
+                                        'QRS Duration',
+                                        'QRS Axis',
+                                        'T Axis',
+                                        'P Axis',
+                                        'PR Interval'):
+                    ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
+
+        return 'PR Interval' + ": " + \
+               ecgdata['PR Interval'] + ' ms\n' + \
+               'QRS Duration' + ": " + \
+               ecgdata['QRS Duration'] + ' ms\n' + \
+               'QT/QTc: ' + \
+               ecgdata['QT Interval'] + '/' + \
+               ecgdata['QTc Interval'] + ' ms\n' + \
+               'QT/QTc: ' + \
+               ecgdata['QT Interval'] + '/' + \
+               ecgdata['QTc Interval'] + ' ms\n' + \
+               'Assi P-R-T: ' + \
+               ecgdata['P Axis'] + ' ' + \
+               ecgdata['QRS Axis'] + ' ' + \
+               ecgdata['T Axis'] + ' ms\n' + \
+               'Assi P-R-T: ' + \
+               ecgdata['P Axis'] + ' ' + \
+               ecgdata['QRS Axis'] + ' ' + \
+               ecgdata['T Axis'] + ' ms'
 
     def print_info(self):
 
@@ -147,35 +211,67 @@ class ECG(object):
         pat_sex = self.dicom.PatientSex
         text_y = self.height+23
 
-        from datetime import datetime
         ecg_date_str = (self.dicom.InstanceCreationDate +
                         self.dicom.InstanceCreationTime)
         ecg_date = datetime.strftime(datetime.strptime(ecg_date_str,
                                                        '%Y%m%d%H%M%S'),
                                      '%d %b %Y %H:%M')
         patient_str = "%s (%s) sex: %s" % (pat_name, pat_id, pat_sex)
-        self.ax.text(0, text_y, patient_str, fontsize=12)
-        self.ax.text(0, text_y-5, "ECG date: " + ecg_date, fontsize=10)
+        self.axis.text(0, text_y, patient_str, fontsize=12)
+        self.axis.text(0, text_y-5, "ECG date: " + ecg_date, fontsize=10)
 
-    def plot(self, outputfile):
+    def plot(self, outputfile, layout):
 
-        premax = delta = 0
-        delta = 3
-        for num, signal in enumerate(self.signals[::-1]):
-            delta += 1 + 10 * (premax - signal.min())
-            self.ax.plot(10.0*signal+delta, linewidth=.6, color='black',
-                         antialiased=True, zorder=10)
-            premax = signal.max()
+        rows = len(layout)
+
+        for numrow, row in enumerate(layout):
+            columns = len(row)
+            h_delta = self.samples / columns
+            signal = np.ndarray(0)
+            row_height = self.height / rows
+            v_delta = round(self.height * (1 - 1.0/(rows*2)) -
+                            numrow*(self.height/rows))
+
+            v_delta = (v_delta + 2.5) - (v_delta + 2.5) % 5
+            chunk_size = int(self.samples/len(row))
+
+            for numcol, signum in enumerate(row):
+                left = numcol*chunk_size
+                right = (1+numcol)*chunk_size
+                h = h_delta * numcol
+                plt.plot([h, h], [v_delta-row_height/2.6,
+                                  v_delta+row_height/2.6],
+                         'k-', lw=1, color='blue', zorder=50)
+                signal = np.concatenate((
+                    signal,
+                    10.0*self.signals[signum][left:right])
+                )
+                cseq = self.channel_definitions[signum].ChannelSourceSequence
+                meaning = cseq[0].CodeMeaning.replace(
+                    'Lead', '').replace('(Einthoven)', '')
+                self.axis.text(h+40, v_delta+row_height/3,
+                               meaning, color='b', zorder=50)
+
+            self.axis.text(4000, self.height+4, self.legend(),
+                           fontsize=10, color='k', zorder=50)
+
+            self.axis.plot(signal+v_delta, linewidth=.6, color='black',
+                           antialiased=True, zorder=10)
 
         # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
 
-        plt.savefig(outputfile, dpi=300)
+        plt.savefig(outputfile, dpi=300,
+                    papertype='a4', orientation='landscape')
 
 if __name__ == '__main__':
 
     arguments = docopt(__doc__, version='ECG Convert 0.1')
-    ecg = ECG(arguments['<inputfile>'])
+    inputfile = arguments['<inputfile>']
+    outputfile = arguments['--output']
+    layout = LAYOUT[arguments['--layout']]
+
+    ecg = ECG(inputfile)
     ecg.draw_grid()
     ecg.print_info()
-    ecg.plot(arguments['-o'])
+    ecg.plot(outputfile, layout)
