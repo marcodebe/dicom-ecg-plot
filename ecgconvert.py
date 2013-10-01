@@ -3,16 +3,20 @@
 """ECG Conversion Tool
 
 Usage:
-    ecgconvert.py <inputfile> [--layout=LAYOUT] [--usetex] --output=FILE
+    ecgconvert.py <inputfile> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
+    ecgconvert.py <stu> <ser> <obj> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
 
 Options:
     -h, --help                 This help.
     <inputfile>                Input dicom file.
+    <stu> <ser> <obj>          studyUID seriesUID objectUID
+                               UIDs for WADO download.
     -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1].
     -o FILE --output=FILE      Output file (format deduced by extension).
+    -f FMT --format=FMT        Output format.
     --usetex                   Use TeX for better fonts (25% slower).
 
-Valid layouts are: 3X4_1, 4X3_1, 12X1
+Valid layouts are: 3X4_1, 3X4, 12X1
 
 The output format is deduced from the extension of the filename.
 
@@ -27,30 +31,13 @@ from scipy.signal import butter, lfilter
 import numpy as np
 import dicom
 import struct
+import cStringIO
+import requests
+
+from config import WADOSERVER, LAYOUT
 
 __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
-
-
-LAYOUT = {'3X4_1': [[0, 3, 6, 9],
-                    [1, 4, 7, 10],
-                    [2, 5, 8, 11],
-                    [1]],
-          '3X4':   [[0, 3, 6, 9],
-                    [1, 4, 7, 10],
-                    [2, 5, 8, 11]],
-          '12X1':  [[0],
-                    [1],
-                    [2],
-                    [3],
-                    [4],
-                    [5],
-                    [6],
-                    [7],
-                    [8],
-                    [9],
-                    [10],
-                    [11]]}
 
 
 def butter_bandpass(lowcut, highcut, size, order=5):
@@ -82,9 +69,23 @@ class ECG(object):
     bottom = margin_bottom/paper_h
     top = bottom+height/paper_h
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.dicom = dicom.read_file(self.filename)
+    def __init__(self, filename=None, stu=None, ser=None, obj=None):
+
+        def wadoget(stu, ser, obj):
+
+            payload = {'requestType': 'WADO', 'studyUID': stu,
+                       'seriesUID': ser, 'objectUID': obj}
+            headers = {'content-type': 'application/json'}
+
+            resp = requests.get(WADOSERVER, params=payload, headers=headers)
+            return cStringIO.StringIO(resp.content)
+
+        if filename:
+            inputdata = filename
+        else:
+            inputdata = wadoget(stu, ser, obj)
+
+        self.dicom = dicom.read_file(inputdata)
 
         sequence_item = self.dicom.WaveformSequence[0]
 
@@ -217,7 +218,20 @@ class ECG(object):
         self.axis.text(0, text_y, patient_str, fontsize=12)
         self.axis.text(0, text_y-5, "ECG date: " + ecg_date, fontsize=10)
 
-    def plot(self, outputfile, layout):
+    def save(self, outputfile=None, outformat=None):
+
+        def _save(output):
+            plt.savefig(output, dpi=300, format=outformat,
+                        papertype='a4', orientation='landscape')
+
+        if outputfile:
+            _save(outputfile)
+        else:
+            output = cStringIO.StringIO()
+            _save(output)
+            return output.getvalue()
+
+    def plot(self, layout):
 
         rows = len(layout)
 
@@ -258,21 +272,46 @@ class ECG(object):
         # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
 
-        plt.savefig(outputfile, dpi=300,
-                    papertype='a4', orientation='landscape')
+
+def convert_from_file(filename, layout, outformat=None, ouputfile=None):
+
+    ecg = ECG(filename=filename)
+    return convert(ecg, layout, outformat=None, ouputfile=None)
+
+
+def convert_from_wado(stu, ser, obj, layout, outformat=None, ouputfile=None):
+
+    ecg = ECG(stu=stu, ser=ser, obj=obj)
+    return convert(ecg, layout, outformat=None, ouputfile=None)
+
+
+def convert(ecg, layout, outformat=None, ouputfile=None):
+
+    ecg.draw_grid()
+    ecg.print_info()
+    ecg.plot(layout)
+    return ecg.save(outformat=outformat, outputfile=outputfile)
 
 if __name__ == '__main__':
 
     arguments = docopt(__doc__, version='ECG Convert 0.1')
     inputfile = arguments['<inputfile>']
+    stu = arguments['<stu>']
+    ser = arguments['<ser>']
+    obj = arguments['<obj>']
     outputfile = arguments['--output']
     layout = LAYOUT[arguments['--layout']]
     usetex = arguments['--usetex']
+    outformat = arguments['--format']
 
     if usetex:
         plt.rc('text', usetex=True)
 
-    ecg = ECG(inputfile)
-    ecg.draw_grid()
-    ecg.print_info()
-    ecg.plot(outputfile, layout)
+    if inputfile:
+        output = convert_from_file(inputfile, layout, outformat, outputfile)
+    else:
+        output = convert_from_wado(stu, ser, obj, layout,
+                                   outformat, outputfile)
+
+    if output:
+        print output
