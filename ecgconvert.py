@@ -3,13 +3,14 @@
 """ECG Conversion Tool
 
 Usage:
-    ecgconvert.py <inputfile> [--layout=LAYOUT] --output=FILE
+    ecgconvert.py <inputfile> [--layout=LAYOUT] [--usetex] --output=FILE
 
 Options:
-    -h, --help                 This help
-    <inputfile>                Input dicom file
-    -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1]
-    -o FILE --output=FILE      Output file
+    -h, --help                 This help.
+    <inputfile>                Input dicom file.
+    -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1].
+    -o FILE --output=FILE      Output file (format deduced by extension).
+    --usetex                   Use TeX for better fonts (25% slower).
 
 Valid layouts are: 3X4_1, 4X3_1, 12X1
 
@@ -35,25 +36,21 @@ LAYOUT = {'3X4_1': [[0, 3, 6, 9],
                     [1, 4, 7, 10],
                     [2, 5, 8, 11],
                     [1]],
-          '4X3_1': [[0, 3, 6],
-                    [9, 10, 11],
-                    [1, 4, 7],
-                    [2, 5, 8],
-                    [1]],
-          '12X1': [[0],
-                   [1],
-                   [2],
-                   [3],
-                   [4],
-                   [5],
-                   [6],
-                   [7],
-                   [8],
-                   [9],
-                   [10],
-                   [11]]}
-
-plt.rc('text', usetex=True)
+          '3X4':   [[0, 3, 6, 9],
+                    [1, 4, 7, 10],
+                    [2, 5, 8, 11]],
+          '12X1':  [[0],
+                    [1],
+                    [2],
+                    [3],
+                    [4],
+                    [5],
+                    [6],
+                    [7],
+                    [8],
+                    [9],
+                    [10],
+                    [11]]}
 
 
 def butter_bandpass(lowcut, highcut, size, order=5):
@@ -270,6 +267,10 @@ if __name__ == '__main__':
     inputfile = arguments['<inputfile>']
     outputfile = arguments['--output']
     layout = LAYOUT[arguments['--layout']]
+    usetex = arguments['--usetex']
+
+    if usetex:
+        plt.rc('text', usetex=True)
 
     ecg = ECG(inputfile)
     ecg.draw_grid()
