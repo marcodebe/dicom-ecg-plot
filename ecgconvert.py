@@ -185,23 +185,14 @@ class ECG(object):
                                         'PR Interval'):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
-        return 'Freq. ventr.: ' + \
+        return 'Ventr. Freq.: ' + \
                str(60000 / int(ecgdata['RR Interval'])) + ' BPM\n' + \
-               'PR Interval' + ":" + \
-               ecgdata['PR Interval'] + ' ms\n' + \
-               'QRS Duration' + ": " + \
-               ecgdata['QRS Duration'] + ' ms\n' + \
+               'PR Interval: ' + ecgdata['PR Interval'] + ' ms\n' + \
+               'QRS Duration: ' + ecgdata['QRS Duration'] + ' ms\n' + \
                'QT/QTc: ' + \
                ecgdata['QT Interval'] + '/' + \
                ecgdata['QTc Interval'] + ' ms\n' + \
-               'QT/QTc: ' + \
-               ecgdata['QT Interval'] + '/' + \
-               ecgdata['QTc Interval'] + ' ms\n' + \
-               'Assi P-R-T: ' + \
-               ecgdata['P Axis'] + ' ' + \
-               ecgdata['QRS Axis'] + ' ' + \
-               ecgdata['T Axis'] + ' ms\n' + \
-               'Assi P-R-T: ' + \
+               'P-R-T Axis: ' + \
                ecgdata['P Axis'] + ' ' + \
                ecgdata['QRS Axis'] + ' ' + \
                ecgdata['T Axis'] + ' ms'
@@ -275,7 +266,7 @@ class ECG(object):
                                meaning, color='b', zorder=50)
 
             self.axis.text(4000, self.height+2, self.legend(),
-                           fontsize=7, color='k', zorder=50)
+                           fontsize=10, color='k', zorder=50)
 
             self.axis.plot(signal+v_delta, linewidth=.6, color='black',
                            antialiased=True, zorder=10)
