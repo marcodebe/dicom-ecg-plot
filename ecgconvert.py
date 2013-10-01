@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """ECG Conversion Tool
 
@@ -146,9 +147,9 @@ class ECG(object):
 
     def draw_grid(self):
 
-        self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
+        #self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
         self.axis.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
-        self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
+        #self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
         self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
@@ -156,7 +157,7 @@ class ECG(object):
         alpha = 1
 
         for axe in 'x', 'y':
-            for which in 'major', :  #  'minor':
+            for which in 'major', 'minor':
                 self.axis.grid(which=which, axis=axe,
                                linewidth=linewidth[which],
                                linestyle='-', color=color[which], alpha=alpha)
@@ -176,6 +177,7 @@ class ECG(object):
                 cncs = was.ConceptNameCodeSequence[0]
                 if cncs.CodeMeaning in ('QT Interval',
                                         'QTc Interval',
+                                        'RR Interval',
                                         'QRS Duration',
                                         'QRS Axis',
                                         'T Axis',
@@ -183,7 +185,9 @@ class ECG(object):
                                         'PR Interval'):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
-        return 'PR Interval' + ": " + \
+        return 'Freq. ventr.: ' + \
+               str(60000 / int(ecgdata['RR Interval'])) + ' BPM\n' + \
+               'PR Interval' + ":" + \
                ecgdata['PR Interval'] + ' ms\n' + \
                'QRS Duration' + ": " + \
                ecgdata['QRS Duration'] + ' ms\n' + \
@@ -204,10 +208,17 @@ class ECG(object):
 
     def print_info(self):
 
-        pat_name = self.dicom.PatientName.replace('^', ' ')
+        try:
+            pat_surname, pat_firstname = self.dicom.PatientName.split('^')
+        except ValueError:
+            pat_surname = self.dicom.PatientName
+            pat_firstname = ''
+
+        pat_name = ' '.join((pat_surname, pat_firstname.title()))
+
         pat_id = self.dicom.PatientID
         pat_sex = self.dicom.PatientSex
-        text_y = self.height+23
+        text_y = self.height+18
 
         ecg_date_str = (self.dicom.InstanceCreationDate +
                         self.dicom.InstanceCreationTime)
@@ -263,8 +274,8 @@ class ECG(object):
                 self.axis.text(h+40, v_delta+row_height/3,
                                meaning, color='b', zorder=50)
 
-            self.axis.text(4000, self.height+4, self.legend(),
-                           fontsize=10, color='k', zorder=50)
+            self.axis.text(4000, self.height+2, self.legend(),
+                           fontsize=7, color='k', zorder=50)
 
             self.axis.plot(signal+v_delta, linewidth=.6, color='black',
                            antialiased=True, zorder=10)
@@ -273,19 +284,21 @@ class ECG(object):
         self.fig.set_size_inches(11.69, 8.27)
 
 
-def convert_from_file(filename, layout, outformat=None, ouputfile=None):
+def convert(source, layout, outformat=None, outputfile=None):
 
-    ecg = ECG(filename=filename)
-    return convert(ecg, layout, outformat=None, ouputfile=None)
+    def err(msg):
+        raise(Exception(msg))
 
-
-def convert_from_wado(stu, ser, obj, layout, outformat=None, ouputfile=None):
-
-    ecg = ECG(stu=stu, ser=ser, obj=obj)
-    return convert(ecg, layout, outformat=None, ouputfile=None)
-
-
-def convert(ecg, layout, outformat=None, ouputfile=None):
+    if isinstance(source, dict):
+        if len(source) == 3:
+            ecg = ECG(**source)
+        else:
+            err("source must be a dictionary of stu, ser and obj")
+    elif isinstance(source, basestring):
+        ecg = ECG(filename=source)
+    else:
+        err("`source´ must be a path/to/file.ext string\n" +
+            "or a dictionary of stu, ser and obj")
 
     ecg.draw_grid()
     ecg.print_info()
@@ -300,18 +313,20 @@ if __name__ == '__main__':
     ser = arguments['<ser>']
     obj = arguments['<obj>']
     outputfile = arguments['--output']
-    layout = LAYOUT[arguments['--layout']]
     usetex = arguments['--usetex']
     outformat = arguments['--format']
+    layout = LAYOUT[arguments['--layout']]
 
     if usetex:
         plt.rc('text', usetex=True)
 
     if inputfile:
-        output = convert_from_file(inputfile, layout, outformat, outputfile)
+        source = inputfile
+        output = convert(inputfile, layout, outformat, outputfile)
     else:
-        output = convert_from_wado(stu, ser, obj, layout,
-                                   outformat, outputfile)
+        source = {'stu': stu, 'ser': ser, 'obj': obj}
+
+    output = convert(source, layout, outformat, outputfile)
 
     if output:
         print output
