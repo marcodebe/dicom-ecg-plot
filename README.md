@@ -8,8 +8,9 @@ Convert Dicom ECG (waveform) to PDF, PNG, etc.
 Usage
 -----
 ```bash
-ecgconvert.py <inputfile> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
-ecgconvert.py <stu> <ser> <obj> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
+python convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT]
+python convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT]
+python convert.py --help
 ```
 
 Input can be a file or the triplet studyUID, seriesUID, objectUID. In the latter
@@ -17,11 +18,9 @@ case dicom file is downloaded via [WADO](http://medical.nema.org/Dicom/2011/11_1
 
 The ouput format is deduced from the extension of the filename.
 
-If output file is not given ```--format``` must be defined. Supported output
-formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
+If output file is not given ```--format``` must be defined.
 
-```--usetex``` produces better fonts but slows down the execution and fails if corresponding 
-LaTeX packages are not installed.
+Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
 
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
