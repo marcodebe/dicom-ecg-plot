@@ -28,12 +28,6 @@ The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of ord
 
 New layouts can be defined adding the corresponding matrix in LAYOUT dictionary in ```config.py```.
 
-Work in progress, we need:
- * print textual info (patient and wave info)
- * different layouts
- * exception handling
- * ...
-
 The sample file is a 12-lead ECG anonymized  dicom file produced
 by Mortara equipment and so are all the ECG files I have to test the program.
 
