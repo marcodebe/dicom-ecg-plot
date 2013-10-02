@@ -8,19 +8,26 @@ Convert Dicom ECG (waveform) to PDF, PNG, etc.
 Usage
 -----
 ```bash
-python ecgconvert.py <inputfile> [--layout=LAYOUT] --output=FILE
+ecgconvert.py <inputfile> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
+ecgconvert.py <stu> <ser> <obj> [--layout=LAYOUT] [--usetex] [--output=FILE|--format=FMT]
 ```
+
+Input can be a file or the triplet studyUID, seriesUID, objectUID. In the latter
+case dicom file is downloaded via [WADO](http://medical.nema.org/Dicom/2011/11_18pu.pdf).
 
 The ouput format is deduced from the extension of the filename.
 
-Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba,
-svg, svgz, tif, tiff.
+If output file is not given ```--format``` must be defined. Supported output
+formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
+
+```--usetex``` produces better fonts but slows down the execution and fails if corresponding 
+LaTeX packages are not installed.
 
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
-LAYOUT can be one of: 3X4\_1, 4X3\_1, 12X1 (default: 3X4_1)
+```LAYOUT``` can be one of: 3X4\_1 (that is 3 rows for 4 colums plus 1 row), 3X4, 12X1 (default: 3X4_1)
 
-New layouts can be defined adding the corresponding matrix in LAYOUT dictionary (see code).
+New layouts can be defined adding the corresponding matrix in LAYOUT dictionary in ```config.py```.
 
 Work in progress, we need:
  * print textual info (patient and wave info)
