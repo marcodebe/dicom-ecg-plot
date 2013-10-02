@@ -22,6 +22,7 @@ setup(name='dicomecg_convert',
                 'matplotlib',
                 'cython',
                 'scipy',
-                'docopt'],
+                'docopt',
+                'requests'],
       dependency_links=['http://github.com/scipy/scipy/', ]
       )
