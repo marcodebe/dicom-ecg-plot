@@ -26,11 +26,11 @@ Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg,
 
 The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
 
-`LAYOUT` can be one of: 3X4\_1 (that is 3 rows for 4 colums plus 1 row), 3X4, 12X1 (default: 3X4_1)
+`LAYOUT` can be one of: 3X4\_1 (that is 3 rows for 4 columns plus 1 row), 3X4, 12X1 (default: 3X4_1)
 New layouts can be defined adding the corresponding matrix in LAYOUT dictionary in `config.py`.
 
-The sample file is a 12-lead ECG anonymized  dicom file produced
-by Mortara equipment and so are all the ECG files I have to test the program.
+The sample file is a 12-lead ECG anonymized dicom file produced
+by Mortara equipement and so are all the ECG files I have to test the program.
 
 ## Install
 You first have to install some system library and a fortran compiler.
@@ -64,5 +64,3 @@ python setup.py install
  * http://dicomlookup.com/html/03_03PU.html#LinkTarget_229354
  * http://libir.tmu.edu.tw/bitstream/987654321/21661/1/B09.pdf
  * http://medical.nema.org/Dicom/supps/sup30_lb.pdf
-
-
