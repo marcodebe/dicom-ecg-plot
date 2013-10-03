@@ -68,6 +68,9 @@ class ECG(object):
 
         sequence_item = self.dicom.WaveformSequence[0]
 
+        assert(sequence_item.WaveformSampleInterpretation == 'SS')
+        assert(sequence_item.WaveformBitsAllocated == 16)
+
         self.channel_definitions = sequence_item.ChannelDefinitionSequence
         self.wavewform_data = sequence_item.WaveformData
         self.channels_no = sequence_item.NumberOfWaveformChannels
@@ -99,12 +102,22 @@ class ECG(object):
         """
 
         factor = np.zeros(self.channels_no) + 1
+        baseln = np.zeros(self.channels_no)
+        units = []
         for idx in range(self.channels_no):
             definition = self.channel_definitions[idx]
+
+            assert(definition.WaveformBitsStored == 16)
+
             if definition.get('ChannelSensitivity'):
                 factor[idx] = (
                     float(definition.ChannelSensitivity) *
                     float(definition.ChannelSensitivityCorrectionFactor))
+            if definition.get('ChannelBaseline'):
+                baseln[idx] = float(definition.get('ChannelBaseline'))
+
+            units.append(
+                definition.ChannelSensitivityUnitsSequence[0].CodeValue)
 
         signals = np.asarray(
             struct.unpack('<' + str(len(self.wavewform_data)/2) + 'h',
@@ -112,14 +125,20 @@ class ECG(object):
                               self.samples, self.channels_no).transpose()
 
         for channel in range(self.channels_no):
-            signals[channel] *= factor[channel]
+            signals[channel] = (
+                (signals[channel] + baseln[channel]) * factor[channel]
+            )
 
         low = .05
         high = 40.0
+
+        # conversion factor to obtain millivolts values
+        millivolts = {'uV': 1000.0, 'mV': 1.0}
+
         for i, signal in enumerate(signals):
-            # micro to milli volt
-            signals[i] = butter_bandpass_filter(np.asarray(signal),
-                                                low, high, 1000, order=1)/1000
+            signals[i] = butter_bandpass_filter(
+                np.asarray(signal),
+                low, high, 1000, order=1) / millivolts[units[i]]
 
         return signals
 
