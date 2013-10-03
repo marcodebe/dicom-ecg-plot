@@ -38,37 +38,35 @@ by Mortara equipment and so are all the ECG files I have to test the program.
 
 Install
 -------
-The python library dependencies are:
-* dicom
-* numpy
-* matplotlib
-* scipy
+
+You have to install system libraries and a fortran compiler.
+On Debian machine:
+
+```bash
+sudo apt-get install libblas-dev
+sudo apt-get install liblapack-dev 
+sudo apt-get install gfortran
+```
 
 You can install the corresponding packages from your distribution or in a virtualenv.
 
-### Without virtualenv
+### Global
 ```bash
-sudo apt-get install python-matplotlib python-dicom python-scipy python-numpy
+sudo pip install -r requirements.txt
 git clone git@github.com:marcodebe/dicomecg_convert.git
+cd dicomecg_convert
+sudo python setup.py install
 ```
 
 ### Inside a virtualenv
 
-Installing the dependencies inside the virtualenv could be long and not smooth.
-I had to install system libraries and a fortran compiler.
-
 ```bash
 git clone git@github.com:marcodebe/dicomecg_convert.git
-virtualenv dicomecg_convert
-. dicomecg_convert/bin/activate
-sudo apt-get install libblas-dev
-sudo apt-get install liblapack-dev 
-sudo apt-get install gfortran
-pip install pydicom
-pip install numpy
-pip install matplotlib
-pip install cython
-pip install git+http://github.com/scipy/scipy/
+cd dicomecg_convert
+virtualenv .
+. bin/activate
+pip install -r requirements.txt
+python setup.py install
 ```
 
 Structure of DICOM Waveform

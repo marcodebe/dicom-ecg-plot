@@ -17,12 +17,4 @@ setup(name='dicomecg_convert',
       download_url='https://github.com/marcodebe/dicomecg_convert/downloads',
       license='MIT',
       packages=['ecg', ],
-      requires=['pydicom',
-                'numpy',
-                'matplotlib',
-                'cython',
-                'scipy',
-                'docopt',
-                'requests'],
-      dependency_links=['http://github.com/scipy/scipy/', ]
       )
