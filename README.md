@@ -64,4 +64,4 @@ python setup.py install
  * http://medical.nema.org/Dicom/supps/sup30_lb.pdf
  * http://dicomlookup.com/html/03_03PU.html#LinkTarget_229354
  * http://libir.tmu.edu.tw/bitstream/987654321/21661/1/B09.pdf
- * http://medical.nema.org/Dicom/supps/sup30_lb.pdf
+ * [Mortara ECG Conformance Statement](http://www.mortara.com/fileadmin/user_upload/global/Products/Healthcare/DICOM/ELI%20Electrocardiographs%20DICOM%20Conformance%20Statement.pdf)
