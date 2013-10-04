@@ -36,6 +36,7 @@ by Mortara equipment and so are all the ECG files I have to test the program.
 You first have to install some system library and a fortran compiler.
 On a Debian machine:
 ```bash
+sudo apt-get install libpng12-dev
 sudo apt-get install libblas-dev
 sudo apt-get install liblapack-dev 
 sudo apt-get install gfortran
