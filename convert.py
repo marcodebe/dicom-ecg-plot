@@ -32,7 +32,7 @@ from cStringIO import StringIO
 def convert(source, layout, outformat=None, outputfile=None):
 
     ecg = ECG(source)
-    ecg.draw(layout, 5)
+    ecg.draw(layout, 10)
     return ecg.save(outformat=outformat, outputfile=outputfile)
 
 if __name__ == '__main__':
