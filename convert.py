@@ -26,24 +26,12 @@ Valid formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz,
 
 from ecg import ECG
 from docopt import docopt
+from cStringIO import StringIO
 
 
 def convert(source, layout, outformat=None, outputfile=None):
 
-    def err(msg):
-        raise(Exception(msg))
-
-    if isinstance(source, dict):
-        if len(source) == 3:
-            ecg = ECG(**source)
-        else:
-            err("source must be a dictionary of stu, ser and obj")
-    elif isinstance(source, basestring):
-        ecg = ECG(filename=source)
-    else:
-        err("`source´ must be a path/to/file.ext string\n" +
-            "or a dictionary of stu, ser and obj")
-
+    ecg = ECG(source)
     ecg.draw_grid()
     ecg.print_info()
     ecg.plot(layout)
@@ -61,8 +49,7 @@ if __name__ == '__main__':
     layout = arguments['--layout']
 
     if inputfile:
-        source = inputfile
-        output = convert(inputfile, layout, outformat, outputfile)
+        source = StringIO(open(inputfile).read())
     else:
         source = {'stu': stu, 'ser': ser, 'obj': obj}
 

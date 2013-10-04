@@ -48,7 +48,10 @@ class ECG(object):
     bottom = margin_bottom/paper_h
     top = bottom+height/paper_h
 
-    def __init__(self, filename=None, stu=None, ser=None, obj=None):
+    def __init__(self, source):
+
+        def err(msg):
+            raise(Exception(msg))
 
         def wadoget(stu, ser, obj):
 
@@ -59,13 +62,21 @@ class ECG(object):
             resp = requests.get(WADOSERVER, params=payload, headers=headers)
             return cStringIO.StringIO(resp.content)
 
-        if filename:
-            inputdata = filename
+        if isinstance(source, dict):
+            # dictionary of stu, ser, obj
+            if set(source.keys()) == set(('stu', 'ser', 'obj')):
+                inputdata = wadoget(**source)
+            else:
+                err("source must be a dictionary of stu, ser and obj")
+        elif isinstance(source, basestring) or getattr(source, 'getvalue'):
+            # it is a filename or a (StringIO or cStringIO buffer)
+            inputdata = source
         else:
-            inputdata = wadoget(stu, ser, obj)
+            # What is it?
+            err("`source´ must be a path/to/file.ext string\n" +
+                "or a dictionary of stu, ser and obj")
 
         self.dicom = dicom.read_file(inputdata)
-
         sequence_item = self.dicom.WaveformSequence[0]
 
         assert(sequence_item.WaveformSampleInterpretation == 'SS')
