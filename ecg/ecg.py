@@ -19,16 +19,16 @@ __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
 
 
-def butter_bandpass(lowcut, highcut, size, order=5):
-    nyquist_freq = .5 * size
+def butter_bandpass(lowcut, highcut, sampfreq, order=5):
+    nyquist_freq = .5 * sampfreq
     low = lowcut / nyquist_freq
     high = highcut / nyquist_freq
     num, denom = butter(order, [low, high], btype='band')
     return num, denom
 
 
-def butter_bandpass_filter(data, lowcut, highcut, size, order):
-    num, denom = butter_bandpass(lowcut, highcut, size, order=order)
+def butter_bandpass_filter(data, lowcut, highcut, sampfreq, order):
+    num, denom = butter_bandpass(lowcut, highcut, sampfreq, order=order)
     return lfilter(num, denom, data)
 
 
@@ -86,9 +86,13 @@ class ECG(object):
         self.wavewform_data = sequence_item.WaveformData
         self.channels_no = sequence_item.NumberOfWaveformChannels
         self.samples = sequence_item.NumberOfWaveformSamples
-
+        self.sampling_frequency = sequence_item.SamplingFrequency
+        self.duration = self.samples / self.sampling_frequency
+        self.mm_s = self.width / self.duration
         self.signals = self._signals()
         self.fig, self.axis = self.create_figure()
+
+        print self.samples
 
     def create_figure(self):
         """
@@ -149,7 +153,10 @@ class ECG(object):
         for i, signal in enumerate(signals):
             signals[i] = butter_bandpass_filter(
                 np.asarray(signal),
-                low, high, 1000, order=1) / millivolts[units[i]]
+                low,
+                high,
+                self.sampling_frequency,
+                order=1) / millivolts[units[i]]
 
         return signals
 
@@ -193,17 +200,24 @@ class ECG(object):
                                         'PR Interval'):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
+        bpm = ''
+        if ecgdata.get('RR Interval'):
+            print ecgdata['RR Interval']
+            bpm = str(int(round(60.0 / self.duration *
+                      self.samples /
+                      int(ecgdata['RR Interval'])))) + ' BPM\n'
+
         return 'Ventr. Freq.: ' + \
-               str(60000 / int(ecgdata['RR Interval'])) + ' BPM\n' + \
-               'PR Interval: ' + ecgdata['PR Interval'] + ' ms\n' + \
-               'QRS Duration: ' + ecgdata['QRS Duration'] + ' ms\n' + \
+               bpm + \
+               'PR Interval: ' + ecgdata.get('PR Interval', '') + ' ms\n' + \
+               'QRS Duration: ' + ecgdata.get('QRS Duration', '') + ' ms\n' + \
                'QT/QTc: ' + \
-               ecgdata['QT Interval'] + '/' + \
-               ecgdata['QTc Interval'] + ' ms\n' + \
+               ecgdata.get('QT Interval', '') + '/' + \
+               ecgdata.get('QTc Interval', '') + ' ms\n' + \
                'P-R-T Axis: ' + \
-               ecgdata['P Axis'] + ' ' + \
-               ecgdata['QRS Axis'] + ' ' + \
-               ecgdata['T Axis'] + ' ms'
+               ecgdata.get('P Axis', '') + ' ' + \
+               ecgdata.get('QRS Axis', '') + ' ' + \
+               ecgdata.get('T Axis', '') + ' ms'
 
     def print_info(self):
 
@@ -217,16 +231,31 @@ class ECG(object):
 
         pat_id = self.dicom.PatientID
         pat_sex = self.dicom.PatientSex
-        text_y = self.height+18
+        pat_bdate = datetime.strptime(
+            self.dicom.PatientBirthDate, '%Y%m%d').strftime("%e %b %Y")
 
-        ecg_date_str = (self.dicom.InstanceCreationDate +
-                        self.dicom.InstanceCreationTime)
-        ecg_date = datetime.strftime(datetime.strptime(ecg_date_str,
-                                                       '%Y%m%d%H%M%S'),
-                                     '%d %b %Y %H:%M')
-        patient_str = "%s (%s) sex: %s" % (pat_name, pat_id, pat_sex)
-        self.axis.text(0, text_y, patient_str, fontsize=12)
-        self.axis.text(0, text_y-5, "ECG date: " + ecg_date, fontsize=10)
+        info = "%s (%s) sex: %s\nbirthdate: %s" % (pat_name, pat_id,
+                                                   pat_sex, pat_bdate)
+        plt.figtext(0.08, 0.865, info, fontsize=12)
+
+        info = "duration: %s s | samples: %s | sample freq.: %s/s" % (
+            self.duration,
+            self.samples,
+            self.sampling_frequency)
+        plt.figtext(0.08, 0.02, info, fontsize=10)
+
+        info = "%s mm/s | %s mm/mV" % (self.mm_s, self.mm_mv)
+        plt.figtext(0.68, 0.02, info, fontsize=10)
+
+        plt.figtext(0.5, 0.865, self.legend(), fontsize=10)
+
+        info = 'E. O. Ospedali Galliera\nECG date: '
+        date_str = (self.dicom.InstanceCreationDate +
+                    self.dicom.InstanceCreationTime)
+        info += datetime.strftime(datetime.strptime(date_str,
+                                                    '%Y%m%d%H%M%S'),
+                                  '%d %b %Y %H:%M')
+        plt.figtext(0.03, 0.94, info, fontsize=12)
 
     def save(self, outputfile=None, outformat=None):
 
@@ -241,7 +270,9 @@ class ECG(object):
             _save(output)
             return output.getvalue()
 
-    def plot(self, layoutid):
+    def plot(self, layoutid, mm_mv):
+
+        self.mm_mv = mm_mv
 
         layout = LAYOUT[layoutid]
         rows = len(layout)
@@ -266,7 +297,7 @@ class ECG(object):
                          'k-', lw=1, color='blue', zorder=50)
                 signal = np.concatenate((
                     signal,
-                    10.0*self.signals[signum][left:right])
+                    mm_mv*self.signals[signum][left:right])
                 )
                 cseq = self.channel_definitions[signum].ChannelSourceSequence
                 meaning = cseq[0].CodeMeaning.replace(
@@ -274,11 +305,13 @@ class ECG(object):
                 self.axis.text(h+40, v_delta+row_height/3,
                                meaning, color='b', zorder=50)
 
-            self.axis.text(4000, self.height+2, self.legend(),
-                           fontsize=10, color='k', zorder=50)
-
             self.axis.plot(signal+v_delta, linewidth=.6, color='black',
                            antialiased=True, zorder=10)
 
         # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
+
+    def draw(self, layoutid, mm_mv=10.0):
+        self.draw_grid()
+        self.plot(layoutid, mm_mv)
+        self.print_info()
