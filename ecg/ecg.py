@@ -48,7 +48,7 @@ class ECG(object):
     bottom = margin_bottom/paper_h
     top = bottom+height/paper_h
 
-    def __init__(self, source):
+    def __init__(self, source, wadosrv=WADOSERVER):
 
         def err(msg):
             raise(Exception(msg))
@@ -59,7 +59,7 @@ class ECG(object):
                        'seriesUID': ser, 'objectUID': obj}
             headers = {'content-type': 'application/json'}
 
-            resp = requests.get(WADOSERVER, params=payload, headers=headers)
+            resp = requests.get(wadosrv, params=payload, headers=headers)
             return cStringIO.StringIO(resp.content)
 
         if isinstance(source, dict):
