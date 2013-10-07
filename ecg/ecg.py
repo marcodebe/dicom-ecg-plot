@@ -13,7 +13,31 @@ import struct
 import cStringIO
 import requests
 
-from config import WADOSERVER, LAYOUT
+try:
+    from ecgconfig import WADOSERVER, LAYOUT, PRODUCER
+except ImportError
+    WADOSERVER = "http://example.com"
+    LAYOUT = {'3X4_1': [[0, 3, 6, 9],
+                        [1, 4, 7, 10],
+                        [2, 5, 8, 11],
+                        [1]],
+              '3X4':   [[0, 3, 6, 9],
+                        [1, 4, 7, 10],
+                        [2, 5, 8, 11]],
+              '12X1':  [[0],
+                        [1],
+                        [2],
+                        [3],
+                        [4],
+                        [5],
+                        [6],
+                        [7],
+                        [8],
+                        [9],
+                        [10],
+                        [11]]}
+
+    PRODUCER = "Example Producer"
 
 __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
@@ -91,8 +115,6 @@ class ECG(object):
         self.mm_s = self.width / self.duration
         self.signals = self._signals()
         self.fig, self.axis = self.create_figure()
-
-        print self.samples
 
     def create_figure(self):
         """
@@ -202,7 +224,6 @@ class ECG(object):
 
         bpm = ''
         if ecgdata.get('RR Interval'):
-            print ecgdata['RR Interval']
             bpm = str(int(round(60.0 / self.duration *
                       self.samples /
                       int(ecgdata['RR Interval'])))) + ' BPM\n'
@@ -238,18 +259,16 @@ class ECG(object):
                                                    pat_sex, pat_bdate)
         plt.figtext(0.08, 0.865, info, fontsize=12)
 
-        info = "duration: %s s | samples: %s | sample freq.: %s/s" % (
-            self.duration,
-            self.samples,
-            self.sampling_frequency)
+        info = "total time: %s s | sample freq.: %s Hz" % (
+            self.duration, self.sampling_frequency)
         plt.figtext(0.08, 0.02, info, fontsize=10)
 
         info = "%s mm/s | %s mm/mV" % (self.mm_s, self.mm_mv)
-        plt.figtext(0.68, 0.02, info, fontsize=10)
+        plt.figtext(0.78, 0.02, info, fontsize=10)
 
         plt.figtext(0.5, 0.865, self.legend(), fontsize=10)
 
-        info = 'E. O. Ospedali Galliera\nECG date: '
+        info = PRODUCER + '\nStudy date: '
         date_str = (self.dicom.InstanceCreationDate +
                     self.dicom.InstanceCreationTime)
         info += datetime.strftime(datetime.strptime(date_str,
