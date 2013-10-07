@@ -15,7 +15,7 @@ import requests
 
 try:
     from ecgconfig import WADOSERVER, LAYOUT, PRODUCER
-except ImportError
+except ImportError:
     WADOSERVER = "http://example.com"
     LAYOUT = {'3X4_1': [[0, 3, 6, 9],
                         [1, 4, 7, 10],
