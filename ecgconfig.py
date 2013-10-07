@@ -1,4 +1,4 @@
-WADOSERVER = "http://10.0.5.74:8085/service/wado"
+WADOSERVER = "http://example.com/"
 
 LAYOUT = {'3X4_1': [[0, 3, 6, 9],
                     [1, 4, 7, 10],
@@ -20,4 +20,4 @@ LAYOUT = {'3X4_1': [[0, 3, 6, 9],
                     [10],
                     [11]]}
 
-PRODUCER = "Ospedali Galliera"
+PRODUCER = "Example Producer"
