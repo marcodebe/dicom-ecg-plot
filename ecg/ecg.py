@@ -238,7 +238,7 @@ class ECG(object):
                'P-R-T Axis: ' + \
                ecgdata.get('P Axis', '') + ' ' + \
                ecgdata.get('QRS Axis', '') + ' ' + \
-               ecgdata.get('T Axis', '') + ' ms'
+               ecgdata.get('T Axis', '')
 
     def print_info(self):
 
@@ -263,7 +263,8 @@ class ECG(object):
             self.duration, self.sampling_frequency)
         plt.figtext(0.08, 0.02, info, fontsize=10)
 
-        info = "%s mm/s | %s mm/mV" % (self.mm_s, self.mm_mv)
+        # TODO: the bandpass filter 0.05-40 Hz will have to became a parameter
+        info = "%s mm/s %s mm/mV 0.05-40 Hz" % (self.mm_s, self.mm_mv)
         plt.figtext(0.78, 0.02, info, fontsize=10)
 
         plt.figtext(0.5, 0.865, self.legend(), fontsize=10)
