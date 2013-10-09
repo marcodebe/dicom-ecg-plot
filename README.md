@@ -24,7 +24,7 @@ The ouput format is deduced from the extension of the filename.
 If output file is not given `--format` must be defined.
 Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
 
-The signals are filtered using a bandpass (0.05-40 Hz) butterworth filter of order 1.
+The signals are filtered using a lowpass (40 Hz) butterworth filter of order 2.
 
 `LAYOUT` can be one of: 3X4\_1 (that is 3 rows for 4 columns plus 1 row), 3X4, 12X1 (default: 3X4_1)
 New layouts can be defined adding the corresponding matrix in LAYOUT dictionary in `config.py`.
