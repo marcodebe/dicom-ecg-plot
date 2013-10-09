@@ -39,11 +39,18 @@ except ImportError:
 
     PRODUCER = "Example Producer"
 
-__author__ = "Marco De Benedetto"
+__author__ = "Marco De Benedetto and Simone Ferretti"
+__license__ = "MIT"
+__credits__ = ["Marco De Benedetto", "Simone Ferretti", "Francesco Formisano"]
 __email__ = "debe@galliera.it"
 
 
 def butter_lowpass(highcut, sampfreq, order):
+    """Supporting function.
+
+    Prepare some data and actually call the scipy butter function.
+    """
+
     nyquist_freq = .5 * sampfreq
     high = highcut / nyquist_freq
     num, denom = butter(order, high, btype='lowpass')
@@ -51,11 +58,21 @@ def butter_lowpass(highcut, sampfreq, order):
 
 
 def butter_lowpass_filter(data, highcut, sampfreq, order):
+    """Apply the Butterworth lowpass filter to the DICOM waveform.
+
+    @param data: the waveform data.
+    @param highcut: the frequencies from which apply the cut.
+    @param sampfreq: the sampling frequency.
+    @param order: the filter order.
+    """
+
     num, denom = butter_lowpass(highcut, sampfreq, order=order)
     return lfilter(num, denom, data)
 
 
 class ECG(object):
+    """The class representing the ECG object
+    """
 
     paper_w, paper_h = 297.0, 210.0
 
@@ -72,12 +89,23 @@ class ECG(object):
     top = bottom+height / paper_h
 
     def __init__(self, source):
+        """The ECG class constructor.
+
+        @param source: the ECG source, it could be a filename, a buffer
+        or a dict of study, serie, object info (to query
+        a WADO server).
+        @type source: C{str} or C{dict}.
+        """
 
         def err(msg):
             raise(Exception(msg))
 
         def wadoget(stu, ser, obj):
+            """Query the WADO server.
 
+            @return: a buffer containing the DICOM object (the WADO response).
+            @rtype: C{cStringIO.StringIO}.
+            """
             payload = {
                 'requestType': 'WADO',
                 'studyUID': stu,
@@ -104,6 +132,8 @@ class ECG(object):
                 "or a dictionary of stu, ser and obj")
 
         self.dicom = dicom.read_file(inputdata)
+        """@ivar: the dicom object."""
+
         sequence_item = self.dicom.WaveformSequence[0]
 
         assert(sequence_item.WaveformSampleInterpretation == 'SS')
@@ -120,9 +150,7 @@ class ECG(object):
         self.fig, self.axis = self.create_figure()
 
     def create_figure(self):
-        """
-        Prepare figure and axes
-        """
+        """Prepare figure and axes"""
 
         # Init figure and axes
         fig = plt.figure(tight_layout=False)
@@ -140,8 +168,12 @@ class ECG(object):
 
     def _signals(self):
         """
+        Retrieve the signals from the DICOM WaveformData object.
+
         sequence_item := dicom.dataset.FileDataset.WaveformData[n]
-        Return a list of signals.
+
+        @return: a list of signals.
+        @rtype: C{list}
         """
 
         factor = np.zeros(self.channels_no) + 1
@@ -190,6 +222,7 @@ class ECG(object):
         return signals
 
     def draw_grid(self):
+        """Draw the grid in the ecg plotting area."""
 
         #self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
         self.axis.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
@@ -215,6 +248,10 @@ class ECG(object):
         self.axis.set_yticklabels([])
 
     def legend(self):
+        """A string containing the legend.
+
+        Auxiliary function for the print_info method.
+        """
 
         ecgdata = {}
         for was in self.dicom.WaveformAnnotationSequence:
@@ -246,6 +283,8 @@ class ECG(object):
                ecgdata.get('T Axis', '')
 
     def print_info(self):
+        """Print info about the patient and about the ecg signals.
+        """
 
         try:
             pat_surname, pat_firstname = self.dicom.PatientName.split('^')
@@ -286,6 +325,12 @@ class ECG(object):
         plt.figtext(0.43, 0.955, info, fontsize=8)
 
     def save(self, outputfile=None, outformat=None):
+        """Save the plot result either on a file or on a output buffer,
+        depending on the input params.
+
+        @param outputfile: the output filename.
+        @param outformat: the ouput file format.
+        """
 
         def _save(output):
             plt.savefig(
@@ -301,6 +346,22 @@ class ECG(object):
             return output.getvalue()
 
     def plot(self, layoutid, mm_mv):
+        """Plot the ecg signals inside the plotting area.
+        Three possible layout choice are:
+        * 12X1 (one signal per line)
+        * 3X4 (4 signal chunk per line)
+        * 3X4_1 (4 signal chunk per line. on the last line
+        is drawn a complete signal)
+        * ... and much much more
+
+        The general rule is that the layout list is formed
+        by as much lists as the number of lines we want to draw into the
+        plotting area, each one containing the number of the signal chunk
+        we want to plot in that line.
+
+        @param layoutid: the desired layout
+        @type layoutid: C{list} of C{list}
+        """
 
         self.mm_mv = mm_mv
 
@@ -356,6 +417,8 @@ class ECG(object):
         self.fig.set_size_inches(11.69, 8.27)
 
     def draw(self, layoutid, mm_mv=10.0):
+        """Draw grid, info and signals"""
+
         self.draw_grid()
         self.plot(layoutid, mm_mv)
         self.print_info()
