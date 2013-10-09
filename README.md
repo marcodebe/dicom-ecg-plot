@@ -60,6 +60,22 @@ pip install -r requirements.txt
 python setup.py install
 ```
 
+## Documentation
+To generate documentation use epydoc packages:
+```bash
+cd path/to/dicomecg_convert
+epydoc --html -o docs ecg.py
+```
+Read epydoc manual for other output formats and options:
+```bash
+epydoc -h
+```
+To install the epydoc package on:
+```bash
+sudo pip install epydoc
+```
+or download the installation package from [Epydoc](http://epydoc.sourceforge.net/) and follow the instructions.
+
 ## References
  * http://medical.nema.org/Dicom/supps/sup30_lb.pdf
  * http://dicomlookup.com/html/03_03PU.html#LinkTarget_229354
