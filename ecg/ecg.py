@@ -43,7 +43,7 @@ __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
 
 
-def butter_lowpass(highcut, sampfreq, order=5):
+def butter_lowpass(highcut, sampfreq, order):
     nyquist_freq = .5 * sampfreq
     high = highcut / nyquist_freq
     num, denom = butter(order, high, btype='lowpass')
@@ -185,7 +185,7 @@ class ECG(object):
                 np.asarray(signal),
                 high,
                 self.sampling_frequency,
-                order=1) / millivolts[units[i]]
+                order=2) / millivolts[units[i]]
 
         return signals
 
