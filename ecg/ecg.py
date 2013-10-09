@@ -43,16 +43,15 @@ __author__ = "Marco De Benedetto"
 __email__ = "debe@galliera.it"
 
 
-def butter_bandpass(lowcut, highcut, sampfreq, order=5):
+def butter_lowpass(highcut, sampfreq, order=5):
     nyquist_freq = .5 * sampfreq
-    low = lowcut / nyquist_freq
     high = highcut / nyquist_freq
-    num, denom = butter(order, [low, high], btype='band')
+    num, denom = butter(order, high, btype='lowpass')
     return num, denom
 
 
-def butter_bandpass_filter(data, lowcut, highcut, sampfreq, order):
-    num, denom = butter_bandpass(lowcut, highcut, sampfreq, order=order)
+def butter_lowpass_filter(data, highcut, sampfreq, order):
+    num, denom = butter_lowpass(highcut, sampfreq, order=order)
     return lfilter(num, denom, data)
 
 
@@ -166,16 +165,14 @@ class ECG(object):
                 (signals[channel] + baseln[channel]) * factor[channel]
             )
 
-        low = .05
         high = 40.0
 
         # conversion factor to obtain millivolts values
         millivolts = {'uV': 1000.0, 'mV': 1.0}
 
         for i, signal in enumerate(signals):
-            signals[i] = butter_bandpass_filter(
+            signals[i] = butter_lowpass_filter(
                 np.asarray(signal),
-                low,
                 high,
                 self.sampling_frequency,
                 order=1) / millivolts[units[i]]
