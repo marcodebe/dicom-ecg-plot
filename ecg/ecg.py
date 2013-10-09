@@ -295,27 +295,27 @@ class ECG(object):
         rows = len(layout)
 
         for numrow, row in enumerate(layout):
+
             columns = len(row)
             h_delta = self.samples / columns
-            signal = np.ndarray(0)
             row_height = self.height / rows
             v_delta = round(self.height * (1 - 1.0/(rows*2)) -
                             numrow*(self.height/rows))
 
             v_delta = (v_delta + 2.5) - (v_delta + 2.5) % 5
-            chunk_size = int(self.samples/len(row))
 
+            # Lenght of a signal chunk
+            chunk_size = int(self.samples/len(row))
             for numcol, signum in enumerate(row):
                 left = numcol*chunk_size
                 right = (1+numcol)*chunk_size
-                h = h_delta * numcol
-                plt.plot([h, h], [v_delta-row_height/2.6,
-                                  v_delta+row_height/2.6],
-                         'k-', lw=1, color='blue', zorder=50)
-                signal = np.concatenate((
-                    signal,
-                    mm_mv*self.signals[signum][left:right])
-                )
+
+                # The signal chunk, vertical shifted and
+                # scaled by mm/mV factor
+                signal = v_delta + mm_mv * self.signals[signum][left:right]
+                self.axis.plot(range(left, right), signal,
+                               linewidth=0.6, color='black', zorder=10)
+
                 cseq = self.channel_definitions[signum].ChannelSourceSequence
                 meaning = cseq[0].CodeMeaning.replace(
                     'Lead', '').replace('(Einthoven)', '')
