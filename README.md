@@ -34,6 +34,8 @@ by Mortara equipment and so are all the ECG files I have to test the program.
 
 **Does someone know where can I found DICOM ECG files from different producers?**
 
+**THE PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY OF ANY KIND.**
+
 ## Install
 You first have to install some system library and a fortran compiler.
 On a Debian machine:
