@@ -28,14 +28,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from datetime import datetime
-from matplotlib import pylab as plt
-from scipy.signal import butter, lfilter
 import numpy as np
 import dicom
 import struct
 import cStringIO
 import requests
+import i18n
+from datetime import datetime
+from matplotlib import pylab as plt
+from scipy.signal import butter, lfilter
+
 
 try:
     from ecgconfig import WADOSERVER, LAYOUT, PRODUCER
@@ -294,14 +296,16 @@ class ECG(object):
                       self.samples /
                       int(ecgdata['RR Interval'])))) + ' BPM\n'
 
-        return 'Ventr. Freq.: ' + \
+        return i18n.ventr_freq + \
                bpm + \
-               'PR Interval: ' + ecgdata.get('PR Interval', '') + ' ms\n' + \
-               'QRS Duration: ' + ecgdata.get('QRS Duration', '') + ' ms\n' + \
-               'QT/QTc: ' + \
+               i18n.pr_interval + \
+               ecgdata.get('PR Interval', '') + ' ms\n' + \
+               i18n.qrs_duration + \
+               ecgdata.get('QRS Duration', '') + ' ms\n' + \
+               i18n.qt_qtc + \
                ecgdata.get('QT Interval', '') + '/' + \
                ecgdata.get('QTc Interval', '') + ' ms\n' + \
-               'P-R-T Axis: ' + \
+               i18n.prt_axis + \
                ecgdata.get('P Axis', '') + ' ' + \
                ecgdata.get('QRS Axis', '') + ' ' + \
                ecgdata.get('T Axis', '')
@@ -324,15 +328,20 @@ class ECG(object):
         pat_bdate = datetime.strptime(
             self.dicom.PatientBirthDate, '%Y%m%d').strftime("%e %b %Y")
 
-        info = "%s\nPat. ID: %s\nsex: %s\nbirthdate: %s (%s years old)" % (
-            pat_name, pat_id, pat_sex, pat_bdate, pat_age
+        info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)" % (
+            pat_name,
+            i18n.pat_id, pat_id,
+            i18n.pat_sex, pat_sex,
+            i18n.pat_bdate, pat_bdate,
+            pat_age, i18n.pat_age
         )
         plt.figtext(0.08, 0.87, info, fontsize=10)
 
         plt.figtext(0.5, 0.87, self.legend(), fontsize=8)
 
-        info = "total time: %s s sample freq.: %s Hz" % (
-            self.duration, self.sampling_frequency)
+        info = "%s: %s s %s: %s Hz" % (
+            i18n.duration, self.duration,
+            i18n.sampling_frequency, self.sampling_frequency)
         plt.figtext(0.08, 0.025, info, fontsize=8)
 
         info = PRODUCER
