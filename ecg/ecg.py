@@ -254,7 +254,7 @@ class ECG(object):
         self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
-        linewidth = {'minor': .2, 'major': .2}
+        linewidth = {'minor': .1, 'major': .1}
         alpha = 1
 
         for axe in 'x', 'y':
@@ -426,15 +426,17 @@ class ECG(object):
                     'Lead', '').replace('(Einthoven)', '')
 
                 h = h_delta * numcol
+                v = v_delta+row_height / 2.6
                 plt.plot(
                     [h, h],
-                    [v_delta-row_height / 2.6, v_delta+row_height / 2.6],
-                    color='blue', zorder=50
+                    [v - 3, v],
+                    lw=.6,
+                    color='k', zorder=50
                 )
 
                 self.axis.text(
                     h + 40, v_delta+row_height / 3,
-                    meaning, color='b', zorder=50
+                    meaning, zorder=50, fontsize=8
                 )
 
         # A4 size in inches
