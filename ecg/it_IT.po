@@ -1,0 +1,63 @@
+# Italian translations for dicomecg_convert package
+# Traduzioni italiane per il pacchetto dicomecg_convert..
+# Copyright (C) 2013 Marco De Benedetto
+# This file is distributed under the same license as the dicomecg_convert package.
+# Simone Ferretti <simone@galliera.it>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: dicomecg_convert\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-10 14:44+0200\n"
+"PO-Revision-Date: 2013-10-10 16:46+0200\n"
+"Last-Translator: Simone Ferretti <simone@galliera.it>\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: locale.py:5
+msgid "Ventr. Freq."
+msgstr "Freq. Ventr."
+
+#: locale.py:6
+msgid "PR Interval"
+msgstr "Intervallo PR"
+
+#: locale.py:7
+msgid "QRS Duration"
+msgstr "Durata QRS"
+
+#: locale.py:8
+msgid "QT/QTc"
+msgstr "QT/QTc"
+
+#: locale.py:9
+msgid "P-R-T Axis"
+msgstr "Assi P-R-T"
+
+#: locale.py:10
+msgid "Pat. ID"
+msgstr "ID Paz."
+
+#: locale.py:11
+msgid "sex"
+msgstr "sesso"
+
+#: locale.py:12
+msgid "birthdate"
+msgstr "data di nascita"
+
+#: locale.py:13
+msgid "year old"
+msgstr "anni"
+
+#: locale.py:14
+msgid "total time"
+msgstr "tempo totale"
+
+#: locale.py:15
+msgid "sample freq."
+msgstr "freq. campionamento"

@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Marco De Benedetto
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: dicomecg_convert\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-10 14:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: locale.py:5
+msgid "Ventr. Freq."
+msgstr ""
+
+#: locale.py:6
+msgid "PR Interval"
+msgstr ""
+
+#: locale.py:7
+msgid "QRS Duration"
+msgstr ""
+
+#: locale.py:8
+msgid "QT/QTc"
+msgstr ""
+
+#: locale.py:9
+msgid "P-R-T Axis"
+msgstr ""
+
+#: locale.py:10
+msgid "Pat. ID"
+msgstr ""
+
+#: locale.py:11
+msgid "sex"
+msgstr ""
+
+#: locale.py:12
+msgid "birthdate"
+msgstr ""
+
+#: locale.py:13
+msgid "year old"
+msgstr ""
+
+#: locale.py:14
+msgid "total time"
+msgstr ""
+
+#: locale.py:15
+msgid "sample freq."
+msgstr ""

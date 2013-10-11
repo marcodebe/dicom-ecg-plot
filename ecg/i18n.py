@@ -25,7 +25,7 @@ def get_lang():
 gettext.bindtextdomain(APP_NAME, LOCAL_PATH)
 gettext.textdomain(APP_NAME)
 
-lang = gettext.translation(APP_NAME, LOCAL_PATH, 
+lang = gettext.translation(APP_NAME, LOCAL_PATH,
                            languages=get_lang(), fallback=True)
 
 _ = lang.gettext
