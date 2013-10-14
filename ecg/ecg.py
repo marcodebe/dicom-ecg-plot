@@ -256,7 +256,7 @@ class ECG(object):
         self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
-        linewidth = {'minor': .1, 'major': .1}
+        linewidth = {'minor': .1, 'major': .2}
         alpha = 1
 
         for axe in 'x', 'y':
@@ -335,7 +335,7 @@ class ECG(object):
             i18n.pat_bdate, pat_bdate,
             pat_age, i18n.pat_age
         )
-        plt.figtext(0.08, 0.87, info, fontsize=10)
+        plt.figtext(0.08, 0.87, info, fontsize=8)
 
         plt.figtext(0.5, 0.87, self.legend(), fontsize=8)
 
