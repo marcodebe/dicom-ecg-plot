@@ -328,12 +328,19 @@ class ECG(object):
         pat_bdate = datetime.strptime(
             self.dicom.PatientBirthDate, '%Y%m%d').strftime("%e %b %Y")
 
-        info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)" % (
+        ecg_date = datetime.strftime(
+            datetime.strptime(self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'),
+            '%d %b %Y %H:%M'
+        )
+
+        info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)\n%s" % (
             pat_name,
             i18n.pat_id, pat_id,
             i18n.pat_sex, pat_sex,
             i18n.pat_bdate, pat_bdate,
-            pat_age, i18n.pat_age
+            pat_age, i18n.pat_age,
+            ecg_date
+
         )
         plt.figtext(0.08, 0.87, info, fontsize=8)
 
@@ -350,12 +357,6 @@ class ECG(object):
         # TODO: the lowpass filter 0.05-40 Hz will have to became a parameter
         info = "%s mm/s %s mm/mV 0.05-40 Hz" % (self.mm_s, self.mm_mv)
         plt.figtext(0.76, 0.025, info, fontsize=8)
-
-        info = datetime.strftime(
-            datetime.strptime(self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'),
-            '%d %b %Y %H:%M'
-        )
-        plt.figtext(0.43, 0.955, info, fontsize=8)
 
     def save(self, outputfile=None, outformat=None):
         """Save the plot result either on a file or on a output buffer,
