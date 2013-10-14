@@ -290,25 +290,30 @@ class ECG(object):
                 ):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
-        bpm = ''
+        ret_str = "%s: -\n" % i18n.ventr_freq
         if ecgdata.get('RR Interval'):
-            bpm = str(int(round(60.0 / self.duration *
-                      self.samples /
-                      int(ecgdata['RR Interval'])))) + ' BPM\n'
+            try:
+                bpm = (
+                    60.0 / self.duration *
+                    self.samples / float(ecgdata['RR Interval'])
+                )
+                ret_str = "%s: %.1f BPM\n" % (i18n.ventr_freq, bpm)
+            except ZeroDivisionError:
+                pass
 
-        return i18n.ventr_freq + \
-               bpm + \
-               i18n.pr_interval + \
-               ecgdata.get('PR Interval', '') + ' ms\n' + \
-               i18n.qrs_duration + \
-               ecgdata.get('QRS Duration', '') + ' ms\n' + \
-               i18n.qt_qtc + \
-               ecgdata.get('QT Interval', '') + '/' + \
-               ecgdata.get('QTc Interval', '') + ' ms\n' + \
-               i18n.prt_axis + \
-               ecgdata.get('P Axis', '') + ' ' + \
-               ecgdata.get('QRS Axis', '') + ' ' + \
-               ecgdata.get('T Axis', '')
+        ret_str += "%s: %s ms\n" % (i18n.pr_interval,
+                                    ecgdata.get('PR Interval', ''))
+        ret_str += "%s: %s ms\n" % (i18n.qrs_duration,
+                                    ecgdata.get('QRS Duration', ''))
+        ret_str += "%s: %s/%s ms\n" % (i18n.qt_qtc,
+                                       ecgdata.get('QT Interval', ''),
+                                       ecgdata.get('QTc Interval', ''))
+        ret_str += "%s: %s %s %s" % (i18n.prt_axis,
+                                     ecgdata.get('P Axis', ''),
+                                     ecgdata.get('QRS Axis', ''),
+                                     ecgdata.get('T Axis', ''))
+
+        return ret_str
 
     def print_info(self):
         """Print info about the patient and about the ecg signals.
@@ -321,12 +326,15 @@ class ECG(object):
             pat_firstname = ''
 
         pat_name = ' '.join((pat_surname, pat_firstname.title()))
-        pat_age = int(self.dicom.get('PatientAge', '').strip('Y'))
+        pat_age = self.dicom.get('PatientAge', '').strip('Y')
 
         pat_id = self.dicom.PatientID
         pat_sex = self.dicom.PatientSex
-        pat_bdate = datetime.strptime(
-            self.dicom.PatientBirthDate, '%Y%m%d').strftime("%e %b %Y")
+        try:
+            pat_bdate = datetime.strptime(
+                self.dicom.PatientBirthDate, '%Y%m%d').strftime("%e %b %Y")
+        except ValueError:
+            pat_bdate = ""
 
         ecg_date = datetime.strftime(
             datetime.strptime(self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'),
