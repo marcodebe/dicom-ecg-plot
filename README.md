@@ -26,15 +26,11 @@ The ouput format is deduced from the extension of the filename.
 If output file is not given `--format` must be defined.
 Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
 
-The signals are filtered using a lowpass (40 Hz) [butterworth filter](http://en.wikipedia.org/wiki/Butterworth_filter) of order 2.
+The signals are filtered using a lowpass (40 Hz) [butterworth filter](http://en.wikipedia.org/wiki/Butterworth_filter) 
+of order 2.
 
 `LAYOUT` can be one of: 3X4\_1 (that is 3 rows for 4 columns plus 1 row), 3X4, 12X1 (default: 3X4_1).
 New layouts can be defined adding the corresponding matrix in LAYOUT dictionary in `config.py`.
-
-The [sample file](https://github.com/marcodebe/dicomecg_convert/blob/master/sample_files/anonymous_ecg.dcm) is a 12-lead ECG anonymized dicom file produced
-by Mortara equipment and so are all the ECG files I have to test the program.
-
-**Does someone know where can I found DICOM ECG files from different producers?**
 
 **THE PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY OF ANY KIND.**
 
