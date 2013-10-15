@@ -12,7 +12,7 @@ Try it online first!
 --------------------
 You can use the **[demo site](https://ecg.galliera.it)** to quickly test the results
 before installing the software.
-You can convert your own DICOM files, or use preloaded sample files from different modality mnodels.
+You can convert your own DICOM files, or use preloaded sample files from different modality models.
 
 Usage of `convert.py` tool
 -----------------------
