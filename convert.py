@@ -2,8 +2,8 @@
 """ECG Conversion Tool
 
 Usage:
-    convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT]
-    convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT]
+    convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid]
+    convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid]
     convert.py --help
 
 Options:
@@ -14,6 +14,7 @@ Options:
     -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1].
     -o FILE --output=FILE      Output file (format deduced by extension).
     -f FMT --format=FMT        Output format.
+    --minor-grid               Draw minor axis grid (1mm).
 
 Valid layouts are: 3X4_1, 3X4, 12X1
 
@@ -29,10 +30,10 @@ from docopt import docopt
 from cStringIO import StringIO
 
 
-def convert(source, layout, outformat=None, outputfile=None):
+def convert(source, layout, outformat=None, outputfile=None, minor_axis=False):
 
     ecg = ECG(source)
-    ecg.draw(layout, 10, minor_axis=True)
+    ecg.draw(layout, 10, minor_axis)
     return ecg.save(outformat=outformat, outputfile=outputfile)
 
 if __name__ == '__main__':
@@ -45,13 +46,14 @@ if __name__ == '__main__':
     outputfile = arguments['--output']
     outformat = arguments['--format']
     layout = arguments['--layout']
+    minor_axis = arguments['--minor-grid']
 
     if inputfile:
         source = StringIO(open(inputfile).read())
     else:
         source = {'stu': stu, 'ser': ser, 'obj': obj}
 
-    output = convert(source, layout, outformat, outputfile)
+    output = convert(source, layout, outformat, outputfile, minor_axis)
 
     if output:
         print output

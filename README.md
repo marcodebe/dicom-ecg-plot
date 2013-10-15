@@ -9,8 +9,8 @@ A demo site, using this library, is available [here](https://ecg.galliera.it).
 Usage
 -----
 ```bash
-python convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT]
-python convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT]
+python convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT] --minor-grid
+python convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT] --minor-grid
 python convert.py --help
 ```
 For example the file [anonymous\_ecg\_3X4\_1.png](https://github.com/marcodebe/dicomecg_convert/blob/master/sample_files/anonymous_ecg_3X4_1.png)
@@ -26,7 +26,10 @@ The ouput format is deduced from the extension of the filename.
 If output file is not given `--format` must be defined.
 Supported output formats are: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.
 
-The signals are filtered using a lowpass (40 Hz) [butterworth filter](http://en.wikipedia.org/wiki/Butterworth_filter) 
+By default the 5mm grid is drawn, `--minor-grid` add the minor grid (1mm).
+
+The signals are filtered using a lowpass (40 Hz)
+[butterworth filter](http://en.wikipedia.org/wiki/Butterworth_filter) 
 of order 2.
 
 `LAYOUT` can be one of: 3X4\_1 (that is 3 rows for 4 columns plus 1 row), 3X4, 12X1 (default: 3X4_1).
