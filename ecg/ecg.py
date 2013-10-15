@@ -253,12 +253,14 @@ class ECG(object):
 
         return signals
 
-    def draw_grid(self):
+    def draw_grid(self, minor_axis):
         """Draw the grid in the ecg plotting area."""
 
-        #self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
+        if minor_axis:
+            self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
+            self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
+
         self.axis.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
-        #self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
         self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
@@ -467,9 +469,9 @@ class ECG(object):
         # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
 
-    def draw(self, layoutid, mm_mv=10.0):
+    def draw(self, layoutid, mm_mv=10.0, minor_axis=False):
         """Draw grid, info and signals"""
 
-        self.draw_grid()
+        self.draw_grid(minor_axis)
         self.plot(layoutid, mm_mv)
         self.print_info()
