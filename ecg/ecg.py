@@ -445,7 +445,7 @@ class ECG(object):
                 # The signal chunk, vertical shifted and
                 # scaled by mm/mV factor
                 signal = v_delta + mm_mv * self.signals[signum][left:right]
-                self.axis.plot(range(left, right), signal,
+                self.axis.plot(range(left, right), signal, clip_on=False,
                                linewidth=0.6, color='black', zorder=10)
 
                 cseq = self.channel_definitions[signum].ChannelSourceSequence
