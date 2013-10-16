@@ -40,7 +40,7 @@ from scipy.signal import butter, lfilter
 
 
 try:
-    from ecgconfig import WADOSERVER, LAYOUT, PRODUCER
+    from ecgconfig import WADOSERVER, LAYOUT, INSTITUTION
 except ImportError:
     WADOSERVER = "http://example.com"
     LAYOUT = {'3x4_1': [[0, 3, 6, 9],
@@ -69,7 +69,10 @@ except ImportError:
                         [10],
                         [11]]}
 
-    PRODUCER = "Example Producer"
+    # If INSTITUTION is set to None the value of the tag InstitutionName is
+    # used
+
+    INSTITUTION = None
 
 __author__ = "Marco De Benedetto and Simone Ferretti"
 __license__ = "MIT"
@@ -386,7 +389,7 @@ class ECG(object):
             i18n.sampling_frequency, self.sampling_frequency)
         plt.figtext(0.08, 0.025, info, fontsize=8)
 
-        info = PRODUCER
+        info = self.dicom.InstitutionName
         plt.figtext(0.38, 0.025, info, fontsize=8)
 
         # TODO: the lowpass filter 0.05-40 Hz will have to became a parameter

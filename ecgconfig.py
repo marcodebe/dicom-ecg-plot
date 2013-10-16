@@ -26,4 +26,5 @@ LAYOUT = {'3x4_1': [[0, 3, 6, 9],
                     [10],
                     [11]]}
 
-PRODUCER = "Example Producer"
+# If INSTITUTION is set to None the value of the tag InstitutionName is used
+INSTITUTION = None
