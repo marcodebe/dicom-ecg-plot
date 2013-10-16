@@ -323,6 +323,22 @@ class ECG(object):
 
         return ret_str
 
+    def interpretation(self):
+        """Return the string ろepresenting the automatic interpretation
+        of the study.
+        """
+
+        ret_str = ''
+        for note in self.dicom.WaveformAnnotationSequence:
+            if hasattr(note, 'UnformattedTextValue'):
+                if note.UnformattedTextValue:
+                    ret_str += note.UnformattedTextValue + "\n"
+
+        if ret_str:
+            ret_str = "Interpretation:\n" + ret_str
+
+        return ret_str
+
     def print_info(self):
         """Print info about the patient and about the ecg signals.
         """
@@ -358,9 +374,12 @@ class ECG(object):
             ecg_date
 
         )
+
         plt.figtext(0.08, 0.87, info, fontsize=8)
 
-        plt.figtext(0.5, 0.87, self.legend(), fontsize=8)
+        plt.figtext(0.35, 0.87, self.legend(), fontsize=8)
+
+        plt.figtext(0.60, 0.87, self.interpretation(), fontsize=8)
 
         info = "%s: %s s %s: %s Hz" % (
             i18n.duration, self.duration,
