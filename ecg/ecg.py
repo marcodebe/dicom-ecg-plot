@@ -377,9 +377,9 @@ class ECG(object):
 
         plt.figtext(0.08, 0.87, info, fontsize=8)
 
-        plt.figtext(0.35, 0.87, self.legend(), fontsize=8)
+        plt.figtext(0.30, 0.87, self.legend(), fontsize=8)
 
-        plt.figtext(0.60, 0.87, self.interpretation(), fontsize=8)
+        plt.figtext(0.45, 0.87, self.interpretation(), fontsize=8)
 
         info = "%s: %s s %s: %s Hz" % (
             i18n.duration, self.duration,
