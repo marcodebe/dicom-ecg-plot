@@ -331,14 +331,17 @@ class ECG(object):
         of the study.
         """
 
-        ret_str = ''
+        ret_str = u''
         for note in self.dicom.WaveformAnnotationSequence:
             if hasattr(note, 'UnformattedTextValue'):
                 if note.UnformattedTextValue:
-                    ret_str += note.UnformattedTextValue + "\n"
+                    ret_str = u"%s\n%s" % (
+                        ret_str,
+                        note.UnformattedTextValue.decode('ISO-8859-1')
+                    )
 
         if ret_str:
-            ret_str = "Interpretation:\n" + ret_str
+            ret_str = u"Interpretation: %s" % ret_str
 
         return ret_str
 
