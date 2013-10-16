@@ -392,7 +392,10 @@ class ECG(object):
             i18n.sampling_frequency, self.sampling_frequency)
         plt.figtext(0.08, 0.025, info, fontsize=8)
 
-        info = self.dicom.InstitutionName
+        info = INSTITUTION
+        if not info:
+            info = self.dicom.get('InstitutionName', '')
+
         plt.figtext(0.38, 0.025, info, fontsize=8)
 
         # TODO: the lowpass filter 0.05-40 Hz will have to became a parameter
