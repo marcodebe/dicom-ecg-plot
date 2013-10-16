@@ -43,20 +43,20 @@ try:
     from ecgconfig import WADOSERVER, LAYOUT, PRODUCER
 except ImportError:
     WADOSERVER = "http://example.com"
-    LAYOUT = {'3X4_1': [[0, 3, 6, 9],
+    LAYOUT = {'3x4_1': [[0, 3, 6, 9],
                         [1, 4, 7, 10],
                         [2, 5, 8, 11],
                         [1]],
-              '3X4':   [[0, 3, 6, 9],
+              '3x4':   [[0, 3, 6, 9],
                         [1, 4, 7, 10],
                         [2, 5, 8, 11]],
-              '6X2':   [[0, 6],
+              '6x2':   [[0, 6],
                         [1, 7],
                         [3, 8],
                         [4, 9],
                         [5, 10],
                         [6, 11]],
-              '12X1':  [[0],
+              '12x1':  [[0],
                         [1],
                         [2],
                         [3],
@@ -398,10 +398,10 @@ class ECG(object):
     def plot(self, layoutid, mm_mv):
         """Plot the ecg signals inside the plotting area.
         Possible layout choice are:
-        * 12X1 (one signal per line)
-        * 6X2 (6 rows 2 columns)
-        * 3X4 (4 signal chunk per line)
-        * 3X4_1 (4 signal chunk per line. on the last line
+        * 12x1 (one signal per line)
+        * 6x2 (6 rows 2 columns)
+        * 3x4 (4 signal chunk per line)
+        * 3x4_1 (4 signal chunk per line. on the last line
         is drawn a complete signal)
         * ... and much much more
 

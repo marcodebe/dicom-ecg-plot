@@ -11,12 +11,12 @@ Options:
     <inputfile>                Input dicom file.
     <stu> <ser> <obj>          studyUID seriesUID objectUID
                                UIDs for WADO download.
-    -l LAYOUT --layout=LAYOUT  Layout [default: 3X4_1].
+    -l LAYOUT --layout=LAYOUT  Layout [default: 3x4_1].
     -o FILE --output=FILE      Output file (format deduced by extension).
     -f FMT --format=FMT        Output format.
     --minor-grid               Draw minor axis grid (1mm).
 
-Valid layouts are: 3X4_1, 3X4, 12X1
+Valid layouts are: 3x4_1, 3x4, 12x1
 
 The output format is deduced from the extension of the filename, if present, or
 from --format option when filename is not specified.
