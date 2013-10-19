@@ -290,6 +290,9 @@ class ECG(object):
         Auxiliary function for the print_info method.
         """
 
+        if not hasattr(self.dicom, 'WaveformAnnotationSequence'):
+            return ''
+
         ecgdata = {}
         for was in self.dicom.WaveformAnnotationSequence:
             if was.get('ConceptNameCodeSequence'):
@@ -330,6 +333,9 @@ class ECG(object):
         """Return the string ろepresenting the automatic interpretation
         of the study.
         """
+
+        if not hasattr(self.dicom, 'WaveformAnnotationSequence'):
+            return ''
 
         ret_str = u''
         for note in self.dicom.WaveformAnnotationSequence:
