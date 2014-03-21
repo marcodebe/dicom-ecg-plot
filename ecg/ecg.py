@@ -191,10 +191,9 @@ class ECG(object):
         fig = plt.figure(tight_layout=False)
         axes = fig.add_subplot(1, 1, 1)
 
-        fig.subplots_adjust(
-            left=self.left, right=self.right,
-            top=self.top, bottom=self.bottom
-        )
+        fig.subplots_adjust(left=self.left, right=self.right, top=self.top,
+                            bottom=self.bottom)
+
         axes.set_ylim([0, self.height])
 
         # We want to plot N points, where N=number of samples
@@ -224,6 +223,7 @@ class ECG(object):
                     float(definition.ChannelSensitivity) *
                     float(definition.ChannelSensitivityCorrectionFactor)
                 )
+
             if definition.get('ChannelBaseline'):
                 baseln[idx] = float(definition.get('ChannelBaseline'))
 
@@ -231,11 +231,13 @@ class ECG(object):
                 definition.ChannelSensitivityUnitsSequence[0].CodeValue
             )
 
+        unpack_fmt = '<%dh' % (len(self.wavewform_data) / 2)
+        unpacked_waveform_data = struct.unpack(unpack_fmt, self.wavewform_data)
         signals = np.asarray(
-            struct.unpack(
-                '<' + str(len(self.wavewform_data)/2) + 'h',
-                self.wavewform_data), dtype=np.float32
-        ).reshape(self.samples, self.channels_no).transpose()
+            unpacked_waveform_data,
+            dtype=np.float32).reshape(
+                self.samples,
+                self.channels_no).transpose()
 
         for channel in range(self.channels_no):
             signals[channel] = (
@@ -248,11 +250,13 @@ class ECG(object):
         millivolts = {'uV': 1000.0, 'mV': 1.0}
 
         for i, signal in enumerate(signals):
+
             signals[i] = butter_lowpass_filter(
                 np.asarray(signal),
                 high,
                 self.sampling_frequency,
-                order=2) / millivolts[units[i]]
+                order=2
+            ) / millivolts[units[i]]
 
         return signals
 
@@ -260,25 +264,42 @@ class ECG(object):
         """Draw the grid in the ecg plotting area."""
 
         if minor_axis:
-            self.axis.xaxis.set_minor_locator(plt.LinearLocator(self.width+1))
-            self.axis.yaxis.set_minor_locator(plt.LinearLocator(self.height+1))
+            self.axis.xaxis.set_minor_locator(
+                plt.LinearLocator(self.width + 1)
+            )
+            self.axis.yaxis.set_minor_locator(
+                plt.LinearLocator(self.height + 1)
+            )
 
-        self.axis.xaxis.set_major_locator(plt.LinearLocator(self.width/5+1))
-        self.axis.yaxis.set_major_locator(plt.LinearLocator(self.height/5+1))
+        self.axis.xaxis.set_major_locator(
+            plt.LinearLocator(self.width / 5 + 1)
+        )
+        self.axis.yaxis.set_major_locator(
+            plt.LinearLocator(self.height / 5 + 1)
+        )
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
         linewidth = {'minor': .1, 'major': .2}
-        alpha = 1
 
         for axe in 'x', 'y':
             for which in 'major', 'minor':
+
                 self.axis.grid(
-                    which=which, axis=axe, linewidth=linewidth[which],
-                    linestyle='-', color=color[which], alpha=alpha
+                    which=which,
+                    axis=axe,
+                    linestyle='-',
+                    linewidth=linewidth[which],
+                    color=color[which]
                 )
+
                 self.axis.tick_params(
-                    which=which, axis=axe, color=color[which],
-                    bottom='off', top='off', left='off', right='off'
+                    which=which,
+                    axis=axe,
+                    color=color[which],
+                    bottom='off',
+                    top='off',
+                    left='off',
+                    right='off'
                 )
 
         self.axis.set_xticklabels([])
@@ -298,9 +319,14 @@ class ECG(object):
             if was.get('ConceptNameCodeSequence'):
                 cncs = was.ConceptNameCodeSequence[0]
                 if cncs.CodeMeaning in (
-                    'QT Interval', 'QTc Interval', 'RR Interval',
-                    'QRS Duration', 'QRS Axis', 'T Axis',
-                    'P Axis', 'PR Interval'
+                    'QT Interval',
+                    'QTc Interval',
+                    'RR Interval',
+                    'QRS Duration',
+                    'QRS Axis',
+                    'T Axis',
+                    'P Axis',
+                    'PR Interval'
                 ):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
@@ -315,22 +341,25 @@ class ECG(object):
             except ZeroDivisionError:
                 pass
 
-        ret_str += "%s: %s ms\n" % (i18n.pr_interval,
-                                    ecgdata.get('PR Interval', ''))
-        ret_str += "%s: %s ms\n" % (i18n.qrs_duration,
-                                    ecgdata.get('QRS Duration', ''))
-        ret_str += "%s: %s/%s ms\n" % (i18n.qt_qtc,
-                                       ecgdata.get('QT Interval', ''),
-                                       ecgdata.get('QTc Interval', ''))
-        ret_str += "%s: %s %s %s" % (i18n.prt_axis,
-                                     ecgdata.get('P Axis', ''),
-                                     ecgdata.get('QRS Axis', ''),
-                                     ecgdata.get('T Axis', ''))
+        ret_str_tmpl = "%s: %s ms\n%s: %s ms\n%s: %s/%s ms\n%s: %s %s %s"
+        ret_str += ret_str_tmpl % (
+            i18n.pr_interval,
+            ecgdata.get('PR Interval', ''),
+            i18n.qrs_duration,
+            ecgdata.get('QRS Duration', ''),
+            i18n.qt_qtc,
+            ecgdata.get('QT Interval', ''),
+            ecgdata.get('QTc Interval', ''),
+            i18n.prt_axis,
+            ecgdata.get('P Axis', ''),
+            ecgdata.get('QRS Axis', ''),
+            ecgdata.get('T Axis', '')
+        )
 
         return ret_str
 
     def interpretation(self):
-        """Return the string ろepresenting the automatic interpretation
+        """Return the string representing the automatic interpretation
         of the study.
         """
 
@@ -346,17 +375,14 @@ class ECG(object):
                         note.UnformattedTextValue.decode('ISO-8859-1')
                     )
 
-        if ret_str:
-            ret_str = u"Interpretation: %s" % ret_str
-
         return ret_str
 
-    def print_info(self):
+    def print_info(self, interpretation):
         """Print info about the patient and about the ecg signals.
         """
 
         try:
-            pat_surname, pat_firstname = self.dicom.PatientName.split('^')
+            pat_surname, pat_firstname = self.dicom.PatientName.decode('ISO-8859-1').split('^')
         except ValueError:
             pat_surname = self.dicom.PatientName
             pat_firstname = ''
@@ -372,30 +398,36 @@ class ECG(object):
         except ValueError:
             pat_bdate = ""
 
-        ecg_date = datetime.strftime(
-            datetime.strptime(self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'),
-            '%d %b %Y %H:%M'
-        )
+        acquisition_date = datetime.strftime(datetime.strptime(
+            self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'), '%d %b %Y %H:%M')
 
-        info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)\n%s" % (
+        info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)\n%s: %s" % (
             pat_name,
-            i18n.pat_id, pat_id,
-            i18n.pat_sex, pat_sex,
-            i18n.pat_bdate, pat_bdate,
-            pat_age, i18n.pat_age,
-            ecg_date
-
+            i18n.pat_id,
+            pat_id,
+            i18n.pat_sex,
+            pat_sex,
+            i18n.pat_bdate,
+            pat_bdate,
+            pat_age,
+            i18n.pat_age,
+            i18n.acquisition_date,
+            acquisition_date
         )
 
         plt.figtext(0.08, 0.87, info, fontsize=8)
 
         plt.figtext(0.30, 0.87, self.legend(), fontsize=8)
 
-        plt.figtext(0.45, 0.87, self.interpretation(), fontsize=8)
+        if interpretation:
+            plt.figtext(0.45, 0.87, self.interpretation(), fontsize=8)
 
         info = "%s: %s s %s: %s Hz" % (
             i18n.duration, self.duration,
-            i18n.sampling_frequency, self.sampling_frequency)
+            i18n.sampling_frequency,
+            self.sampling_frequency
+        )
+
         plt.figtext(0.08, 0.025, info, fontsize=8)
 
         info = INSTITUTION
@@ -464,48 +496,57 @@ class ECG(object):
             # Vertical shift of the origin
             v_delta = round(
                 self.height * (1.0 - 1.0 / (rows*2)) -
-                numrow*(self.height/rows)
+                numrow * (self.height/rows)
             )
 
             # Let's shift the origin on a multiple of 5 mm
             v_delta = (v_delta + 2.5) - (v_delta + 2.5) % 5
 
             # Lenght of a signal chunk
-            chunk_size = int(self.samples/len(row))
+            chunk_size = int(self.samples / len(row))
             for numcol, signum in enumerate(row):
-                left = numcol*chunk_size
-                right = (1+numcol)*chunk_size
+                left = numcol * chunk_size
+                right = (1+numcol) * chunk_size
 
                 # The signal chunk, vertical shifted and
                 # scaled by mm/mV factor
                 signal = v_delta + mm_mv * self.signals[signum][left:right]
-                self.axis.plot(range(left, right), signal, clip_on=False,
-                               linewidth=0.6, color='black', zorder=10)
+                self.axis.plot(
+                    range(left, right),
+                    signal,
+                    clip_on=False,
+                    linewidth=0.6,
+                    color='black',
+                    zorder=10)
 
                 cseq = self.channel_definitions[signum].ChannelSourceSequence
                 meaning = cseq[0].CodeMeaning.replace(
                     'Lead', '').replace('(Einthoven)', '')
 
                 h = h_delta * numcol
-                v = v_delta+row_height / 2.6
+                v = v_delta + row_height / 2.6
                 plt.plot(
                     [h, h],
                     [v - 3, v],
                     lw=.6,
-                    color='k', zorder=50
+                    color='black',
+                    zorder=50
                 )
 
                 self.axis.text(
-                    h + 40, v_delta+row_height / 3,
-                    meaning, zorder=50, fontsize=8
+                    h + 40,
+                    v_delta + row_height / 3,
+                    meaning,
+                    zorder=50,
+                    fontsize=8
                 )
 
         # A4 size in inches
         self.fig.set_size_inches(11.69, 8.27)
 
-    def draw(self, layoutid, mm_mv=10.0, minor_axis=False):
+    def draw(self, layoutid, mm_mv=10.0, minor_axis=False, interpretation=False):
         """Draw grid, info and signals"""
 
         self.draw_grid(minor_axis)
         self.plot(layoutid, mm_mv)
-        self.print_info()
+        self.print_info(interpretation)
