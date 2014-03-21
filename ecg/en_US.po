@@ -60,3 +60,8 @@ msgstr "total time"
 #: locale.py:15
 msgid "sample freq."
 msgstr "sample freq."
+
+#: locale.py:16
+msgid "acquisition date"
+msgstr "study date"
+
