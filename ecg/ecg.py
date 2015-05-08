@@ -184,6 +184,17 @@ class ECG(object):
         self.signals = self._signals()
         self.fig, self.axis = self.create_figure()
 
+    def __del__(self):
+        """
+        Figures created through the pyplot interface
+        (`matplotlib.pyplot.figure`) are retained until explicitly
+        closed and may co nsume too much memory.
+        """
+
+        plt.cla()
+        plt.clf()
+        plt.close()
+
     def create_figure(self):
         """Prepare figure and axes"""
 
