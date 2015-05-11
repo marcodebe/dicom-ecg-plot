@@ -166,8 +166,11 @@ class ECG(object):
             err("`source´ must be a path/to/file.ext string\n" +
                 "or a dictionary of stu, ser and obj")
 
-        self.dicom = dicom.read_file(inputdata)
-        """@ivar: the dicom object."""
+        try:
+            self.dicom = dicom.read_file(inputdata)
+            """@ivar: the dicom object."""
+        except dicom.filereader.InvalidDicomError, err:
+            raise ECGReadFileError(err)
 
         sequence_item = self.dicom.WaveformSequence[0]
 
@@ -561,3 +564,7 @@ class ECG(object):
         self.draw_grid(minor_axis)
         self.plot(layoutid, mm_mv)
         self.print_info(interpretation)
+
+
+class ECGReadFileError(dicom.filereader.InvalidDicomError):
+    pass
