@@ -34,6 +34,7 @@ import struct
 import cStringIO
 import requests
 import i18n
+import re
 from datetime import datetime
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
@@ -412,8 +413,16 @@ class ECG(object):
         except ValueError:
             pat_bdate = ""
 
-        acquisition_date = datetime.strftime(datetime.strptime(
-            self.dicom.AcquisitionDateTime, '%Y%m%d%H%M%S'), '%d %b %Y %H:%M')
+        # Strip microseconds from acquisition date
+        regexp = "\.\d+$"
+        acquisition_date_no_micro = re.sub(
+            regexp, '', self.dicom.AcquisitionDateTime)
+
+        acquisition_date = datetime.strftime(
+            datetime.strptime(
+                acquisition_date_no_micro, '%Y%m%d%H%M%S'),
+            '%d %b %Y %H:%M'
+        )
 
         info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)\n%s: %s" % (
             pat_name,
