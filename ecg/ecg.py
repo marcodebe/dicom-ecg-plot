@@ -144,6 +144,7 @@ class ECG(object):
             """
             payload = {
                 'requestType': 'WADO',
+                'contentType': 'application/dicom',
                 'studyUID': stu,
                 'seriesUID': ser,
                 'objectUID': obj
