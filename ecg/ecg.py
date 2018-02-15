@@ -31,9 +31,9 @@ THE SOFTWARE.
 import numpy as np
 import dicom
 import struct
-import cStringIO
+import io
 import requests
-import i18n
+from . import i18n
 import re
 from datetime import datetime
 from matplotlib import pylab as plt
@@ -134,7 +134,7 @@ class ECG(object):
         """
 
         def err(msg):
-            raise(Exception(msg))
+            raise Exception
 
         def wadoget(stu, ser, obj):
             """Query the WADO server.
@@ -152,7 +152,7 @@ class ECG(object):
             headers = {'content-type': 'application/json'}
 
             resp = requests.get(WADOSERVER, params=payload, headers=headers)
-            return cStringIO.StringIO(resp.content)
+            return io.StringIO(resp.content)
 
         if isinstance(source, dict):
             # dictionary of stu, ser, obj
@@ -160,7 +160,7 @@ class ECG(object):
                 inputdata = wadoget(**source)
             else:
                 err("source must be a dictionary of stu, ser and obj")
-        elif isinstance(source, basestring) or getattr(source, 'getvalue'):
+        elif isinstance(source, str) or getattr(source, 'getvalue'):
             # it is a filename or a (StringIO or cStringIO buffer)
             inputdata = source
         else:
@@ -171,7 +171,7 @@ class ECG(object):
         try:
             self.dicom = dicom.read_file(inputdata)
             """@ivar: the dicom object."""
-        except dicom.filereader.InvalidDicomError, err:
+        except dicom.filereader.InvalidDicomError as err:
             raise ECGReadFileError(err)
 
         sequence_item = self.dicom.WaveformSequence[0]
@@ -382,11 +382,11 @@ class ECG(object):
         if not hasattr(self.dicom, 'WaveformAnnotationSequence'):
             return ''
 
-        ret_str = u''
+        ret_str = ''
         for note in self.dicom.WaveformAnnotationSequence:
             if hasattr(note, 'UnformattedTextValue'):
                 if note.UnformattedTextValue:
-                    ret_str = u"%s\n%s" % (
+                    ret_str = "%s\n%s" % (
                         ret_str,
                         note.UnformattedTextValue.decode('ISO-8859-1')
                     )
@@ -398,9 +398,9 @@ class ECG(object):
         """
 
         try:
-            pat_surname, pat_firstname = self.dicom.PatientName.decode('ISO-8859-1').split('^')
+            pat_surname, pat_firstname = str(self.dicom.PatientName).split('^')
         except ValueError:
-            pat_surname = self.dicom.PatientName
+            pat_surname = str(self.dicom.PatientName)
             pat_firstname = ''
 
         pat_name = ' '.join((pat_surname, pat_firstname.title()))
@@ -481,7 +481,7 @@ class ECG(object):
         if outputfile:
             _save(outputfile)
         else:
-            output = cStringIO.StringIO()
+            output = io.StringIO()
             _save(output)
             return output.getvalue()
 
@@ -536,7 +536,7 @@ class ECG(object):
                 # scaled by mm/mV factor
                 signal = v_delta + mm_mv * self.signals[signum][left:right]
                 self.axis.plot(
-                    range(left, right),
+                    list(range(left, right)),
                     signal,
                     clip_on=False,
                     linewidth=0.6,

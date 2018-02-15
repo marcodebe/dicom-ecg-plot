@@ -28,7 +28,7 @@ Valid formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz,
 
 from ecg import ECG
 from docopt import docopt
-from cStringIO import StringIO
+from io import BytesIO
 
 
 def convert(source, layout, outformat, outputfile,
@@ -52,11 +52,11 @@ if __name__ == '__main__':
     interpretation = arguments['--interpretation']
 
     if inputfile:
-        source = StringIO(open(inputfile).read())
+        source = BytesIO(open(inputfile, mode='rb').read())
     else:
         source = {'stu': stu, 'ser': ser, 'obj': obj}
 
     output = convert(source, layout, outformat, outputfile, minor_axis, interpretation)
 
     if output:
-        print output
+        print(output)
