@@ -481,7 +481,7 @@ class ECG(object):
         if outputfile:
             _save(outputfile)
         else:
-            output = io.StringIO()
+            output = io.BytesIO()
             _save(output)
             return output.getvalue()
 
