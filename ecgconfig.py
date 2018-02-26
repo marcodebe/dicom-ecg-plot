@@ -1,3 +1,6 @@
+from __future__ import unicode_literals, print_function, division, absolute_import
+from future import standard_library
+standard_library.install_aliases()
 WADOSERVER = "http://example.com/"
 
 LAYOUT = {'3x4_1': [[0, 3, 6, 9],

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals, print_function, division, absolute_import
+from future import standard_library
+standard_library.install_aliases()
 import os
-import sys
 import locale
 import gettext
 

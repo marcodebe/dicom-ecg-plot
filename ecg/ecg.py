@@ -1,3 +1,7 @@
+from __future__ import unicode_literals, print_function, division, absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import int, round, str, range, object
 # -*- coding: utf-8 -*-
 """ECG (waveform) Dicom module
 
@@ -27,18 +31,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-
 import numpy as np
 import dicom
 import struct
-import cStringIO
+import io
 import requests
-import i18n
+from . import i18n
 import re
 from datetime import datetime
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
-
 
 try:
     from ecgconfig import WADOSERVER, LAYOUT, INSTITUTION
@@ -48,27 +50,27 @@ except ImportError:
                         [1, 4, 7, 10],
                         [2, 5, 8, 11],
                         [1]],
-              '3x4':   [[0, 3, 6, 9],
-                        [1, 4, 7, 10],
-                        [2, 5, 8, 11]],
-              '6x2':   [[0, 6],
-                        [1, 7],
-                        [3, 8],
-                        [4, 9],
-                        [5, 10],
-                        [6, 11]],
-              '12x1':  [[0],
-                        [1],
-                        [2],
-                        [3],
-                        [4],
-                        [5],
-                        [6],
-                        [7],
-                        [8],
-                        [9],
-                        [10],
-                        [11]]}
+              '3x4': [[0, 3, 6, 9],
+                      [1, 4, 7, 10],
+                      [2, 5, 8, 11]],
+              '6x2': [[0, 6],
+                      [1, 7],
+                      [3, 8],
+                      [4, 9],
+                      [5, 10],
+                      [6, 11]],
+              '12x1': [[0],
+                       [1],
+                       [2],
+                       [3],
+                       [4],
+                       [5],
+                       [6],
+                       [7],
+                       [8],
+                       [9],
+                       [10],
+                       [11]]}
 
     # If INSTITUTION is set to None the value of the tag InstitutionName is
     # used
@@ -120,9 +122,9 @@ class ECG(object):
 
     # Normalized in [0, 1]
     left = margin_left / paper_w
-    right = left+width / paper_w
+    right = left + width / paper_w
     bottom = margin_bottom / paper_h
-    top = bottom+height / paper_h
+    top = bottom + height / paper_h
 
     def __init__(self, source):
         """The ECG class constructor.
@@ -134,7 +136,7 @@ class ECG(object):
         """
 
         def err(msg):
-            raise(Exception(msg))
+            raise Exception
 
         def wadoget(stu, ser, obj):
             """Query the WADO server.
@@ -152,7 +154,7 @@ class ECG(object):
             headers = {'content-type': 'application/json'}
 
             resp = requests.get(WADOSERVER, params=payload, headers=headers)
-            return cStringIO.StringIO(resp.content)
+            return io.StringIO(resp.content)
 
         if isinstance(source, dict):
             # dictionary of stu, ser, obj
@@ -160,24 +162,24 @@ class ECG(object):
                 inputdata = wadoget(**source)
             else:
                 err("source must be a dictionary of stu, ser and obj")
-        elif isinstance(source, basestring) or getattr(source, 'getvalue'):
+        elif isinstance(source, str) or getattr(source, 'getvalue'):
             # it is a filename or a (StringIO or cStringIO buffer)
             inputdata = source
         else:
             # What is it?
-            err("`source´ must be a path/to/file.ext string\n" +
+            err("'source' must be a path/to/file.ext string\n" +
                 "or a dictionary of stu, ser and obj")
 
         try:
             self.dicom = dicom.read_file(inputdata)
             """@ivar: the dicom object."""
-        except dicom.filereader.InvalidDicomError, err:
+        except dicom.filereader.InvalidDicomError as err:
             raise ECGReadFileError(err)
 
         sequence_item = self.dicom.WaveformSequence[0]
 
-        assert(sequence_item.WaveformSampleInterpretation == 'SS')
-        assert(sequence_item.WaveformBitsAllocated == 16)
+        assert (sequence_item.WaveformSampleInterpretation == 'SS')
+        assert (sequence_item.WaveformBitsAllocated == 16)
 
         self.channel_definitions = sequence_item.ChannelDefinitionSequence
         self.wavewform_data = sequence_item.WaveformData
@@ -213,7 +215,7 @@ class ECG(object):
         axes.set_ylim([0, self.height])
 
         # We want to plot N points, where N=number of samples
-        axes.set_xlim([0, self.samples-1])
+        axes.set_xlim([0, self.samples - 1])
         return fig, axes
 
     def _signals(self):
@@ -232,7 +234,7 @@ class ECG(object):
         for idx in range(self.channels_no):
             definition = self.channel_definitions[idx]
 
-            assert(definition.WaveformBitsStored == 16)
+            assert (definition.WaveformBitsStored == 16)
 
             if definition.get('ChannelSensitivity'):
                 factor[idx] = (
@@ -252,8 +254,8 @@ class ECG(object):
         signals = np.asarray(
             unpacked_waveform_data,
             dtype=np.float32).reshape(
-                self.samples,
-                self.channels_no).transpose()
+            self.samples,
+            self.channels_no).transpose()
 
         for channel in range(self.channels_no):
             signals[channel] = (
@@ -266,7 +268,6 @@ class ECG(object):
         millivolts = {'uV': 1000.0, 'mV': 1.0}
 
         for i, signal in enumerate(signals):
-
             signals[i] = butter_lowpass_filter(
                 np.asarray(signal),
                 high,
@@ -299,7 +300,6 @@ class ECG(object):
 
         for axe in 'x', 'y':
             for which in 'major', 'minor':
-
                 self.axis.grid(
                     which=which,
                     axis=axe,
@@ -335,14 +335,14 @@ class ECG(object):
             if was.get('ConceptNameCodeSequence'):
                 cncs = was.ConceptNameCodeSequence[0]
                 if cncs.CodeMeaning in (
-                    'QT Interval',
-                    'QTc Interval',
-                    'RR Interval',
-                    'QRS Duration',
-                    'QRS Axis',
-                    'T Axis',
-                    'P Axis',
-                    'PR Interval'
+                        'QT Interval',
+                        'QTc Interval',
+                        'RR Interval',
+                        'QRS Duration',
+                        'QRS Axis',
+                        'T Axis',
+                        'P Axis',
+                        'PR Interval'
                 ):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
@@ -382,11 +382,11 @@ class ECG(object):
         if not hasattr(self.dicom, 'WaveformAnnotationSequence'):
             return ''
 
-        ret_str = u''
+        ret_str = ''
         for note in self.dicom.WaveformAnnotationSequence:
             if hasattr(note, 'UnformattedTextValue'):
                 if note.UnformattedTextValue:
-                    ret_str = u"%s\n%s" % (
+                    ret_str = "%s\n%s" % (
                         ret_str,
                         note.UnformattedTextValue.decode('ISO-8859-1')
                     )
@@ -398,9 +398,9 @@ class ECG(object):
         """
 
         try:
-            pat_surname, pat_firstname = self.dicom.PatientName.decode('ISO-8859-1').split('^')
+            pat_surname, pat_firstname = str(self.dicom.PatientName).split('^')
         except ValueError:
-            pat_surname = self.dicom.PatientName
+            pat_surname = str(self.dicom.PatientName)
             pat_firstname = ''
 
         pat_name = ' '.join((pat_surname, pat_firstname.title()))
@@ -481,7 +481,7 @@ class ECG(object):
         if outputfile:
             _save(outputfile)
         else:
-            output = cStringIO.StringIO()
+            output = io.BytesIO()
             _save(output)
             return output.getvalue()
 
@@ -519,8 +519,8 @@ class ECG(object):
 
             # Vertical shift of the origin
             v_delta = round(
-                self.height * (1.0 - 1.0 / (rows*2)) -
-                numrow * (self.height/rows)
+                self.height * (1.0 - 1.0 / (rows * 2)) -
+                numrow * (self.height / rows)
             )
 
             # Let's shift the origin on a multiple of 5 mm
@@ -530,13 +530,13 @@ class ECG(object):
             chunk_size = int(self.samples / len(row))
             for numcol, signum in enumerate(row):
                 left = numcol * chunk_size
-                right = (1+numcol) * chunk_size
+                right = (1 + numcol) * chunk_size
 
                 # The signal chunk, vertical shifted and
                 # scaled by mm/mV factor
                 signal = v_delta + mm_mv * self.signals[signum][left:right]
                 self.axis.plot(
-                    range(left, right),
+                    list(range(left, right)),
                     signal,
                     clip_on=False,
                     linewidth=0.6,

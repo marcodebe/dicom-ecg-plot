@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 # Use setuptools if we can
+from __future__ import unicode_literals, print_function, division, absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import open
 try:
     from setuptools.core import setup
 except ImportError:
