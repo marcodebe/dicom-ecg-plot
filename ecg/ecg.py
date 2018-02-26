@@ -1,3 +1,7 @@
+from __future__ import unicode_literals, print_function, division, absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import int, round, str, range, object
 # -*- coding: utf-8 -*-
 """ECG (waveform) Dicom module
 
@@ -27,7 +31,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-
 import numpy as np
 import dicom
 import struct
@@ -39,7 +42,6 @@ from datetime import datetime
 from matplotlib import pylab as plt
 from scipy.signal import butter, lfilter
 
-
 try:
     from ecgconfig import WADOSERVER, LAYOUT, INSTITUTION
 except ImportError:
@@ -48,27 +50,27 @@ except ImportError:
                         [1, 4, 7, 10],
                         [2, 5, 8, 11],
                         [1]],
-              '3x4':   [[0, 3, 6, 9],
-                        [1, 4, 7, 10],
-                        [2, 5, 8, 11]],
-              '6x2':   [[0, 6],
-                        [1, 7],
-                        [3, 8],
-                        [4, 9],
-                        [5, 10],
-                        [6, 11]],
-              '12x1':  [[0],
-                        [1],
-                        [2],
-                        [3],
-                        [4],
-                        [5],
-                        [6],
-                        [7],
-                        [8],
-                        [9],
-                        [10],
-                        [11]]}
+              '3x4': [[0, 3, 6, 9],
+                      [1, 4, 7, 10],
+                      [2, 5, 8, 11]],
+              '6x2': [[0, 6],
+                      [1, 7],
+                      [3, 8],
+                      [4, 9],
+                      [5, 10],
+                      [6, 11]],
+              '12x1': [[0],
+                       [1],
+                       [2],
+                       [3],
+                       [4],
+                       [5],
+                       [6],
+                       [7],
+                       [8],
+                       [9],
+                       [10],
+                       [11]]}
 
     # If INSTITUTION is set to None the value of the tag InstitutionName is
     # used
@@ -120,9 +122,9 @@ class ECG(object):
 
     # Normalized in [0, 1]
     left = margin_left / paper_w
-    right = left+width / paper_w
+    right = left + width / paper_w
     bottom = margin_bottom / paper_h
-    top = bottom+height / paper_h
+    top = bottom + height / paper_h
 
     def __init__(self, source):
         """The ECG class constructor.
@@ -165,7 +167,7 @@ class ECG(object):
             inputdata = source
         else:
             # What is it?
-            err("`source´ must be a path/to/file.ext string\n" +
+            err("'source' must be a path/to/file.ext string\n" +
                 "or a dictionary of stu, ser and obj")
 
         try:
@@ -176,8 +178,8 @@ class ECG(object):
 
         sequence_item = self.dicom.WaveformSequence[0]
 
-        assert(sequence_item.WaveformSampleInterpretation == 'SS')
-        assert(sequence_item.WaveformBitsAllocated == 16)
+        assert (sequence_item.WaveformSampleInterpretation == 'SS')
+        assert (sequence_item.WaveformBitsAllocated == 16)
 
         self.channel_definitions = sequence_item.ChannelDefinitionSequence
         self.wavewform_data = sequence_item.WaveformData
@@ -213,7 +215,7 @@ class ECG(object):
         axes.set_ylim([0, self.height])
 
         # We want to plot N points, where N=number of samples
-        axes.set_xlim([0, self.samples-1])
+        axes.set_xlim([0, self.samples - 1])
         return fig, axes
 
     def _signals(self):
@@ -232,7 +234,7 @@ class ECG(object):
         for idx in range(self.channels_no):
             definition = self.channel_definitions[idx]
 
-            assert(definition.WaveformBitsStored == 16)
+            assert (definition.WaveformBitsStored == 16)
 
             if definition.get('ChannelSensitivity'):
                 factor[idx] = (
@@ -252,8 +254,8 @@ class ECG(object):
         signals = np.asarray(
             unpacked_waveform_data,
             dtype=np.float32).reshape(
-                self.samples,
-                self.channels_no).transpose()
+            self.samples,
+            self.channels_no).transpose()
 
         for channel in range(self.channels_no):
             signals[channel] = (
@@ -266,7 +268,6 @@ class ECG(object):
         millivolts = {'uV': 1000.0, 'mV': 1.0}
 
         for i, signal in enumerate(signals):
-
             signals[i] = butter_lowpass_filter(
                 np.asarray(signal),
                 high,
@@ -299,7 +300,6 @@ class ECG(object):
 
         for axe in 'x', 'y':
             for which in 'major', 'minor':
-
                 self.axis.grid(
                     which=which,
                     axis=axe,
@@ -335,14 +335,14 @@ class ECG(object):
             if was.get('ConceptNameCodeSequence'):
                 cncs = was.ConceptNameCodeSequence[0]
                 if cncs.CodeMeaning in (
-                    'QT Interval',
-                    'QTc Interval',
-                    'RR Interval',
-                    'QRS Duration',
-                    'QRS Axis',
-                    'T Axis',
-                    'P Axis',
-                    'PR Interval'
+                        'QT Interval',
+                        'QTc Interval',
+                        'RR Interval',
+                        'QRS Duration',
+                        'QRS Axis',
+                        'T Axis',
+                        'P Axis',
+                        'PR Interval'
                 ):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
@@ -519,8 +519,8 @@ class ECG(object):
 
             # Vertical shift of the origin
             v_delta = round(
-                self.height * (1.0 - 1.0 / (rows*2)) -
-                numrow * (self.height/rows)
+                self.height * (1.0 - 1.0 / (rows * 2)) -
+                numrow * (self.height / rows)
             )
 
             # Let's shift the origin on a multiple of 5 mm
@@ -530,7 +530,7 @@ class ECG(object):
             chunk_size = int(self.samples / len(row))
             for numcol, signum in enumerate(row):
                 left = numcol * chunk_size
-                right = (1+numcol) * chunk_size
+                right = (1 + numcol) * chunk_size
 
                 # The signal chunk, vertical shifted and
                 # scaled by mm/mV factor
