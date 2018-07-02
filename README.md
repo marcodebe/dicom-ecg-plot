@@ -4,7 +4,7 @@
 # Dicom ECG Conversion
 A python module and relative tool to convert Dicom ECG (waveform) files to PDF, PNG, SVG, etc.
 The DICOM file can also be specified as `studyUID seriesUID objectUID` and 
-retrieved by your WADO server.
+retrieved from your WADO server.
 
 **THE PROGRAM IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL, BUT WITHOUT ANY WARRANTY OF ANY KIND.**
 
