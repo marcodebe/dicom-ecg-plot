@@ -47,10 +47,12 @@ New layouts can be defined adding the corresponding matrix in LAYOUT dictionary 
 You first have to install some system library and a fortran compiler.
 On a Debian machine:
 ```bash
-sudo apt-get install libpng12-dev
-sudo apt-get install libblas-dev
-sudo apt-get install liblapack-dev 
-sudo apt-get install gfortran
+sudo apt install libpng12-dev
+sudo apt install libblas-dev
+sudo apt install liblapack-dev 
+sudo apt install gfortran
+sudo apt install python3-dev
+sudo apt install python3-tk
 ```
 
 ### Global installation
