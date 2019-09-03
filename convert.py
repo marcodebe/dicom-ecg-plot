@@ -32,6 +32,7 @@ from builtins import open
 from ecg import ECG
 from docopt import docopt
 from io import BytesIO
+import sys
 
 
 def convert(source, layout, outformat, outputfile,
@@ -62,4 +63,4 @@ if __name__ == '__main__':
     output = convert(source, layout, outformat, outputfile, minor_axis, interpretation)
 
     if output:
-        print(output)
+        sys.stdout.buffer.write(output)
