@@ -25,10 +25,6 @@ from --format option when filename is not specified.
 Valid formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz,
                tif, tiff.
 """
-from __future__ import unicode_literals, print_function, division, absolute_import
-from future import standard_library
-standard_library.install_aliases()
-from builtins import open
 from ecg import ECG
 from docopt import docopt
 from io import BytesIO
