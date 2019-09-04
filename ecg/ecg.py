@@ -391,7 +391,7 @@ class ECG(object):
                 if note.UnformattedTextValue:
                     ret_str = "%s\n%s" % (
                         ret_str,
-                        note.UnformattedTextValue.decode('ISO-8859-1')
+                        note.UnformattedTextValue
                     )
 
         return ret_str
