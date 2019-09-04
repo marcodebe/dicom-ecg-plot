@@ -38,12 +38,20 @@ except ImportError:
     import pydicom as dicom
 import struct
 import io
+import os
 import requests
 from . import i18n
 import re
 from datetime import datetime
-from matplotlib import pylab as plt
+from matplotlib import use
 from scipy.signal import butter, lfilter
+
+# python2 fails if DISPLAY is not defined with:
+# _tkinter.TclError: no display name and no $DISPLAY environment variable
+if os.environ.get('DISPLAY','') == '':
+    use('Agg')
+
+from matplotlib import pylab as plt
 
 try:
     from ecgconfig import WADOSERVER, LAYOUT, INSTITUTION
@@ -198,7 +206,7 @@ class ECG(object):
         """
         Figures created through the pyplot interface
         (`matplotlib.pyplot.figure`) are retained until explicitly
-        closed and may co nsume too much memory.
+        closed and may consume too much memory.
         """
 
         plt.cla()
@@ -315,10 +323,10 @@ class ECG(object):
                     which=which,
                     axis=axe,
                     color=color[which],
-                    bottom='off',
-                    top='off',
-                    left='off',
-                    right='off'
+                    bottom=False,
+                    top=False,
+                    left=False,
+                    right=False
                 )
 
         self.axis.set_xticklabels([])
