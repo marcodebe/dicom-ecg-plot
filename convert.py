@@ -63,4 +63,7 @@ if __name__ == '__main__':
     output = convert(source, layout, outformat, outputfile, minor_axis, interpretation)
 
     if output:
-        sys.stdout.buffer.write(output)
+        try:
+            sys.stdout.buffer.write(output)
+        except AttributeError:
+            sys.stdout.write(output)
