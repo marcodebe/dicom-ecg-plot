@@ -41,7 +41,7 @@ from scipy.signal import butter, lfilter
 
 # python2 fails if DISPLAY is not defined with:
 # _tkinter.TclError: no display name and no $DISPLAY environment variable
-if os.environ.get('DISPLAY','') == '':
+if os.environ.get('DISPLAY', '') == '':
     use('Agg')
 
 from matplotlib import pylab as plt
