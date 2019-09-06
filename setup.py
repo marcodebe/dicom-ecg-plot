@@ -21,7 +21,7 @@ setuptools.setup(
         packages=setuptools.find_packages(),
         scripts=['dicom-ecg-plot'],
         install_requires=[
-            'pydicom',
+            'pydicom>=1.0.1',
             'numpy',
             'matplotlib',
             'scipy',

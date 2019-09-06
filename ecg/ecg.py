@@ -28,10 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 import numpy as np
-try:
-    import dicom
-except ImportError:
-    import pydicom as dicom
+import pydicom as dicom
 import struct
 import io
 import os
