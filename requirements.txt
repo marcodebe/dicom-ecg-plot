@@ -1,6 +1,0 @@
-pydicom
-numpy
-matplotlib
-scipy
-docopt
-requests
