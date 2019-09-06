@@ -419,7 +419,7 @@ class ECG(object):
             pat_bdate = ""
 
         # Strip microseconds from acquisition date
-        regexp = "\.\d+$"
+        regexp = r"\.\d+$"
         acquisition_date_no_micro = re.sub(
             regexp, '', self.dicom.AcquisitionDateTime)
 
