@@ -1,10 +1,11 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """ECG Conversion Tool
 
 Usage:
-    convert.py <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
-    convert.py <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
-    convert.py --help
+    dicom-ecg-plot <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
+    dicom-ecg-plot <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
+    dicom-ecg-plot --help
 
 Options:
     -h, --help                 This help.
@@ -38,9 +39,10 @@ def convert(source, layout, outformat, outputfile,
     ecg.draw(layout, 10, minor_axis, interpretation=interpretation)
     return ecg.save(outformat=outformat, outputfile=outputfile)
 
+
 if __name__ == '__main__':
 
-    arguments = docopt(__doc__, version='ECG Convert 0.1')
+    arguments = docopt(__doc__)
     inputfile = arguments['<inputfile>']
     stu = arguments['<stu>']
     ser = arguments['<ser>']
@@ -56,7 +58,8 @@ if __name__ == '__main__':
     else:
         source = {'stu': stu, 'ser': ser, 'obj': obj}
 
-    output = convert(source, layout, outformat, outputfile, minor_axis, interpretation)
+    output = convert(source, layout, outformat, outputfile,
+                     minor_axis, interpretation)
 
     if output:
         try:
