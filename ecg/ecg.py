@@ -342,6 +342,7 @@ class ECG(object):
                         'QT Interval',
                         'QTc Interval',
                         'RR Interval',
+                        'VRate',
                         'QRS Duration',
                         'QRS Axis',
                         'T Axis',
@@ -350,18 +351,22 @@ class ECG(object):
                 ):
                     ecgdata[cncs.CodeMeaning] = str(was.NumericValue)
 
-        ret_str = "%s: -\n" % i18n.ventr_freq
-        if ecgdata.get('RR Interval'):
+        # If VRate is not defined we calculate ventricular rate from
+        # RR interval
+        try:
+            vrate = float(ecgdata.get('VRate'))
+        except (TypeError, ValueError):
             try:
-                bpm = (
+                vrate = (
                     60.0 / self.duration *
-                    self.samples / float(ecgdata['RR Interval'])
+                    self.samples / float(ecgdata.get('RR Interval'))
                 )
-                ret_str = "%s: %.1f BPM\n" % (i18n.ventr_freq, bpm)
-            except ZeroDivisionError:
-                pass
+            except (TypeError, ValueError, ZeroDivisionError):
+                vrate = "(unknown)"
 
+        ret_str = "%s: %.1f BPM\n" % (i18n.ventr_freq, vrate)
         ret_str_tmpl = "%s: %s ms\n%s: %s ms\n%s: %s/%s ms\n%s: %s %s %s"
+
         ret_str += ret_str_tmpl % (
             i18n.pr_interval,
             ecgdata.get('PR Interval', ''),
