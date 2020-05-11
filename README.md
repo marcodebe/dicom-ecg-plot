@@ -1,5 +1,6 @@
 [logo]: https://raw.github.com/marcodebe/dicomecg_convert/master/images/logo.png
 ![ECG Dicom Convert][logo]
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmarcodebe%2Fdicom-ecg-plot.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmarcodebe%2Fdicom-ecg-plot?ref=badge_shield)
 
 # Dicom ECG plot
 A python tool to plot Dicom ECG.
@@ -60,3 +61,7 @@ New layouts can be defined adding the corresponding matrix in LAYOUT dictionary 
  * http://dicomlookup.com/html/03_03PU.html#LinkTarget_229354
  * http://libir.tmu.edu.tw/bitstream/987654321/21661/1/B09.pdf
  * [Mortara ECG Conformance Statement](http://www.mortara.com/fileadmin/user_upload/global/Products/Healthcare/DICOM/ELI%20Electrocardiographs%20DICOM%20Conformance%20Statement.pdf)
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmarcodebe%2Fdicom-ecg-plot.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmarcodebe%2Fdicom-ecg-plot?ref=badge_large)
