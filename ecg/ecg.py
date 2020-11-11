@@ -158,7 +158,7 @@ class ECG(object):
             headers = {'content-type': 'application/json'}
 
             resp = requests.get(WADOSERVER, params=payload, headers=headers)
-            return io.StringIO(resp.content)
+            return io.BytesIO(resp.content)
 
         if isinstance(source, dict):
             # dictionary of stu, ser, obj
