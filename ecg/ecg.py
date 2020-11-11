@@ -484,7 +484,7 @@ class ECG(object):
         def _save(output):
             plt.savefig(
                 output, dpi=300, format=outformat,
-                papertype='a4', orientation='landscape'
+                orientation='landscape'
             )
 
         if outputfile:
