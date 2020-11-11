@@ -286,17 +286,17 @@ class ECG(object):
 
         if minor_axis:
             self.axis.xaxis.set_minor_locator(
-                plt.LinearLocator(self.width + 1)
+                plt.LinearLocator(int(self.width + 1))
             )
             self.axis.yaxis.set_minor_locator(
-                plt.LinearLocator(self.height + 1)
+                plt.LinearLocator(int(self.height + 1))
             )
 
         self.axis.xaxis.set_major_locator(
-            plt.LinearLocator(self.width / 5 + 1)
+            plt.LinearLocator(int(self.width / 5 + 1))
         )
         self.axis.yaxis.set_major_locator(
-            plt.LinearLocator(self.height / 5 + 1)
+            plt.LinearLocator(int(self.height / 5 + 1))
         )
 
         color = {'minor': '#ff5333', 'major': '#d43d1a'}
