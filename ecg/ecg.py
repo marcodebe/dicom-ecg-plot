@@ -428,11 +428,14 @@ class ECG(object):
         acquisition_date_no_micro = re.sub(
             regexp, '', self.dicom.AcquisitionDateTime)
 
-        acquisition_date = datetime.strftime(
-            datetime.strptime(
-                acquisition_date_no_micro, '%Y%m%d%H%M%S'),
-            '%d %b %Y %H:%M'
-        )
+        try:
+            acquisition_date = datetime.strftime(
+                datetime.strptime(
+                    acquisition_date_no_micro, '%Y%m%d%H%M%S'),
+                '%d %b %Y %H:%M'
+            )
+        except ValueError:
+            acquisition_date = ""
 
         info = "%s\n%s: %s\n%s: %s\n%s: %s (%s %s)\n%s: %s" % (
             pat_name,
