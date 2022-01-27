@@ -357,14 +357,14 @@ class ECG(object):
             vrate = float(ecgdata.get('VRate'))
         except (TypeError, ValueError):
             try:
-                vrate = (
+                vrate = "%.1f" % (
                     60.0 / self.duration *
                     self.samples / float(ecgdata.get('RR Interval'))
                 )
             except (TypeError, ValueError, ZeroDivisionError):
                 vrate = "(unknown)"
 
-        ret_str = "%s: %.1f BPM\n" % (i18n.ventr_freq, vrate)
+        ret_str = "%s: %s BPM\n" % (i18n.ventr_freq, vrate)
         ret_str_tmpl = "%s: %s ms\n%s: %s ms\n%s: %s/%s ms\n%s: %s %s %s"
 
         ret_str += ret_str_tmpl % (
