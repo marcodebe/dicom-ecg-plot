@@ -210,15 +210,14 @@ class ECG(object):
         """Prepare figure and axes"""
 
         # Init figure and axes
-        fig = plt.figure(tight_layout=False)
-        axes = fig.add_subplot(1, 1, 1)
+        fig, axes = plt.subplots()
 
         fig.subplots_adjust(left=self.left, right=self.right, top=self.top,
                             bottom=self.bottom)
 
         axes.set_ylim([0, self.height])
 
-        # We want to plot N points, where N=number of samples
+        # We want to plot N values, where N=number of samples
         axes.set_xlim([0, self.samples - 1])
         return fig, axes
 
