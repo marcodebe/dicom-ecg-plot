@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 import numpy as np
-import pydicom as dicom
+import pydicom
 import struct
 import io
 import os
@@ -175,9 +175,9 @@ class ECG(object):
                 "or a dictionary of stu, ser and obj")
 
         try:
-            self.dicom = dicom.read_file(inputdata)
+            self.dicom = pydicom.dcmread(inputdata)
             """@ivar: the dicom object."""
-        except dicom.filereader.InvalidDicomError as err:
+        except pydicom.filereader.InvalidDicomError as err:
             raise ECGReadFileError(err)
 
         sequence_item = self.dicom.WaveformSequence[0]
@@ -587,5 +587,5 @@ class ECG(object):
         self.print_info(interpretation)
 
 
-class ECGReadFileError(dicom.filereader.InvalidDicomError):
+class ECGReadFileError(pydicom.filereader.InvalidDicomError):
     pass
