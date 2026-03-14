@@ -10,8 +10,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from .reader import DicomECGReader
-from scipy.signal import butter, lfilter
-#from .dsp import butter, lfilter
+from .dsp import butter, lfilter
 from .constants import FILTER_HIGHCUT, FILTER_ORDER, MILLIVOLTS
 
 

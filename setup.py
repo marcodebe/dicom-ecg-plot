@@ -24,7 +24,6 @@ setuptools.setup(
             'pydicom>=1.0.1',
             'numpy',
             'matplotlib',
-            'scipy',
             'docopt',
             'requests',
             ],
