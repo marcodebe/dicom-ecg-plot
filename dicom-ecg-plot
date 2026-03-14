@@ -3,8 +3,8 @@
 """ECG Conversion Tool
 
 Usage:
-    dicom-ecg-plot <inputfile> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
-    dicom-ecg-plot <stu> <ser> <obj> [--layout=LAYOUT] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
+    dicom-ecg-plot <inputfile> [--layout=LAYOUT] [--paper=PAPER] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
+    dicom-ecg-plot <stu> <ser> <obj> [--layout=LAYOUT] [--paper=PAPER] [--output=FILE|--format=FMT] [--minor-grid] [--interpretation]
     dicom-ecg-plot --help
 
 Options:
@@ -13,6 +13,7 @@ Options:
     <stu> <ser> <obj>          studyUID seriesUID objectUID
                                UIDs for WADO download.
     -l LAYOUT --layout=LAYOUT  Layout [default: 3x4_1].
+    -p PAPER --paper=PAPER     Paper format: a4, letter [default: a4].
     -o FILE --output=FILE      Output file (format deduced by extension).
     -f FMT --format=FMT        Output format.
     --minor-grid               Draw minor axis grid (1mm).
@@ -26,16 +27,16 @@ from --format option when filename is not specified.
 Valid formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz,
                tif, tiff.
 """
-from ecg import ECG
+from ecg import ECG, ECGReadFileError
 from docopt import docopt
 from io import BytesIO
 import sys
 
 
 def convert(source, layout, outformat, outputfile,
-            minor_axis=False, interpretation=False):
+            minor_axis=False, interpretation=False, paper='a4'):
 
-    ecg = ECG(source)
+    ecg = ECG(source, paper=paper)
     ecg.draw(layout, 10, minor_axis, interpretation=interpretation)
     return ecg.save(outformat=outformat, outputfile=outputfile)
 
@@ -52,14 +53,18 @@ if __name__ == '__main__':
     layout = arguments['--layout']
     minor_axis = arguments['--minor-grid']
     interpretation = arguments['--interpretation']
+    paper = arguments['--paper']
 
     if inputfile:
-        source = BytesIO(open(inputfile, mode='rb').read())
+        source = inputfile
     else:
         source = {'stu': stu, 'ser': ser, 'obj': obj}
 
-    output = convert(source, layout, outformat, outputfile,
-                     minor_axis, interpretation)
+    try:
+        output = convert(source, layout, outformat, outputfile,
+                         minor_axis, interpretation, paper)
+    except (ECGReadFileError, ValueError) as e:
+        sys.exit(f"Error: {e}")
 
     if output:
         try:
