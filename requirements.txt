@@ -1,0 +1,5 @@
+pydicom>=1.0.1
+numpy
+matplotlib
+docopt
+requests
