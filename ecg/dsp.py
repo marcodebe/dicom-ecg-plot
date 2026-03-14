@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Pure-Python drop-in replacement for scipy.signal.butter and scipy.signal.lfilter.
 
-Elimina la dipendenza da scipy per processor.py.
+Removes the scipy dependency from processor.py.
 
-Limitazioni:
-  - butter(): supporta solo btype='lowpass'
-  - lfilter(): implementazione IIR generale, stessa interfaccia di scipy
+Limitations:
+  - butter(): only btype='lowpass' is supported
+  - lfilter(): general IIR implementation, same interface as scipy
 """
 
 from __future__ import annotations
@@ -18,9 +18,9 @@ import numpy as np
 
 
 def _poly_from_roots(roots):
-    """Restituisce i coefficienti del polinomio monico con le radici date.
+    """Return coefficients of the monic polynomial with the given roots.
 
-    I coefficienti sono ordinati dal grado più alto al più basso.
+    Coefficients are ordered from highest to lowest degree.
     """
     p = [1.0 + 0j]
     for r in roots:
@@ -33,57 +33,56 @@ def _poly_from_roots(roots):
 
 
 def butter(order: int, Wn: float, btype: str = 'lowpass') -> tuple[list[float], list[float]]:
-    """Progetta un filtro IIR Butterworth digitale.
+    """Design a digital Butterworth IIR filter.
 
-    Drop-in replacement per scipy.signal.butter con btype='lowpass'.
+    Drop-in replacement for scipy.signal.butter with btype='lowpass'.
 
-    Metodo: bilinear transform con pre-warping della frequenza di taglio.
-    I poli analogici del prototipo Butterworth di ordine N sono distribuiti
-    uniformemente sulla semicirconferenza sinistra del cerchio unitario:
+    Method: bilinear transform with cutoff frequency pre-warping.
+    The analog Butterworth prototype poles of order N are uniformly
+    distributed on the left half of the unit circle:
 
-        p_k = exp(j * pi * (2k + N - 1) / (2N)),  k = 0, ..., N-1
+        p_k = exp(j * pi * (2k + N + 1) / (2N)),  k = 0, ..., N-1
 
-    Il pre-warping applica wc = 2 * tan(pi * Wn / 2) per preservare
-    esattamente la frequenza di taglio dopo la trasformazione bilineare
-    s = 2*(z-1)/(z+1).
+    Pre-warping applies wc = 2 * tan(pi * Wn / 2) to preserve the
+    cutoff frequency exactly after the bilinear transform s = 2*(z-1)/(z+1).
 
-    I poli digitali si ottengono come z_k = (1 + wc/2 * p_k) / (1 - wc/2 * p_k).
-    Per un filtro passa-basso di ordine N tutti gli N zeri digitali sono in z = -1.
+    Digital poles are obtained as z_k = (1 + wc/2 * p_k) / (1 - wc/2 * p_k).
+    For a lowpass filter of order N all N digital zeros are at z = -1.
 
-    :param order: ordine del filtro (intero >= 1)
-    :param Wn: frequenza di taglio normalizzata in (0, 1), dove 1 = Nyquist
-    :param btype: tipo di filtro; solo 'lowpass' supportato
-    :returns: (b, a) — liste di coefficienti numeratore e denominatore
+    :param order: filter order (integer >= 1)
+    :param Wn: normalised cutoff frequency in (0, 1), where 1 = Nyquist
+    :param btype: filter type; only 'lowpass' is supported
+    :returns: (b, a) — numerator and denominator coefficient lists
     """
     if btype != 'lowpass':
-        raise ValueError("Solo btype='lowpass' è supportato.")
+        raise ValueError("Only btype='lowpass' is supported.")
 
-    # Pre-warping della frequenza di taglio per la trasformazione bilineare
+    # Pre-warp the cutoff frequency for the bilinear transform
     wc = 2.0 * math.tan(math.pi * Wn / 2.0)
 
-    # Poli del prototipo analogico Butterworth, uniformemente distribuiti
-    # sul semipiano sinistro del cerchio unitario (angoli in (pi/2, 3pi/2)).
+    # Butterworth analog prototype poles, uniformly distributed on the
+    # left half of the unit circle (angles in (pi/2, 3pi/2)).
     # Formula: theta_k = pi * (2k + N + 1) / (2N), k = 0, ..., N-1
     analog_poles = [
         cmath.exp(1j * math.pi * (2 * k + order + 1) / (2 * order))
         for k in range(order)
     ]
 
-    # Trasformazione bilineare: z = (1 + wc/2 * s) / (1 - wc/2 * s)
+    # Bilinear transform: z = (1 + wc/2 * s) / (1 - wc/2 * s)
     half_wc = wc / 2.0
     digital_poles = [
         (1.0 + half_wc * p) / (1.0 - half_wc * p)
         for p in analog_poles
     ]
 
-    # Zeri digitali: tutti in z = -1 per il filtro passa-basso
+    # Digital zeros: all at z = -1 for a lowpass filter
     digital_zeros = [-1.0 + 0j] * order
 
-    # Polinomi numeratore e denominatore dalle rispettive radici
+    # Build numerator and denominator polynomials from their roots
     b = _poly_from_roots(digital_zeros)
     a = _poly_from_roots(digital_poles)
 
-    # Normalizzazione: guadagno unitario a DC (z = 1)
+    # Normalise for unity DC gain (z = 1)
     gain = sum(a).real / sum(b).real
     b = [c * gain for c in b]
 
@@ -91,31 +90,31 @@ def butter(order: int, Wn: float, btype: str = 'lowpass') -> tuple[list[float], 
 
 
 def lfilter(b: Sequence[float], a: Sequence[float], x: np.ndarray) -> np.ndarray:
-    """Applica un filtro IIR causale al segnale x.
+    """Apply a causal IIR filter to signal x.
 
-    Drop-in replacement per scipy.signal.lfilter.
+    Drop-in replacement for scipy.signal.lfilter.
 
-    Implementa la forma diretta I con condizioni iniziali nulle:
+    Implements direct form I with zero initial conditions:
 
         y[n] = b[0]*x[n] + b[1]*x[n-1] + ... - a[1]*y[n-1] - a[2]*y[n-2] - ...
 
-    La parte FIR (feedforward) è calcolata in blocco con np.convolve (C),
-    la parte IIR (feedback) rimane sequenziale per natura ricorsiva.
+    The FIR (feedforward) part is computed in one shot with np.convolve (C speed);
+    the IIR (feedback) part remains sequential due to its recursive nature.
 
-    :param b: coefficienti del numeratore (feedforward)
-    :param a: coefficienti del denominatore (feedback); a[0] != 0
-    :param x: segnale in ingresso (array-like)
-    :returns: numpy array del segnale filtrato, stessa lunghezza di x
+    :param b: numerator (feedforward) coefficients
+    :param a: denominator (feedback) coefficients; a[0] must not be zero
+    :param x: input signal (array-like)
+    :returns: numpy array of the filtered signal, same length as x
     """
     a0 = a[0]
     b = np.asarray(b) / a0
     a = np.asarray(a) / a0
     na = len(a)
 
-    # Parte FIR: convoluzione vettoriale in C, tronca ai primi len(x) campioni
+    # FIR part: vectorised convolution in C, truncated to the first len(x) samples
     fir = np.convolve(b, x)[:len(x)]
 
-    # Parte IIR: sequenziale (ogni campione dipende dai precedenti)
+    # IIR part: sequential — each sample depends on previous outputs
     y = np.zeros(len(x))
     for i in range(len(x)):
         y[i] = fir[i]
