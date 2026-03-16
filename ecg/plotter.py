@@ -30,12 +30,29 @@ from .constants import (
     INFO_TOP_X, INFO_TOP_Y, LEGEND_TOP_X, INTERPRETATION_TOP_X,
     DURATION_BOTTOM_X, INSTITUTION_BOTTOM_X, FILTER_BOTTOM_X, INFO_BOTTOM_Y,
     LEAD_LABEL_H_OFFSET, LEAD_LABEL_V_RATIO, SEPARATOR_V_RATIO, SEPARATOR_HEIGHT,
+    LEAD_LABELS,
 )
 
 try:
     from ecgconfig import INSTITUTION
 except ImportError:
     from .constants import DEFAULT_INSTITUTION as INSTITUTION
+
+
+def _lead_label(channel_source) -> str:
+    """Return a short lead label from a ChannelSourceSequence item.
+
+    Prefers a stable CodeValue lookup (MDC / SCPECG schemes) over text
+    manipulation, which is vendor-dependent.  Falls back to stripping the
+    common 'Lead' prefix and '(Einthoven)' suffix from CodeMeaning so that
+    non-standard files still render something sensible.
+    """
+    label = LEAD_LABELS.get(getattr(channel_source, 'CodeValue', None))
+    if label:
+        return label
+    meaning = getattr(channel_source, 'CodeMeaning', '') or ''
+    return re.sub(r'\(Einthoven\)', '', meaning, flags=re.IGNORECASE) \
+              .replace('Lead', '').replace('lead', '').strip()
 
 
 class ECGPlotter:
@@ -159,7 +176,7 @@ class ECGPlotter:
         )
 
         cseq = self.reader.channel_definitions[signum].ChannelSourceSequence
-        meaning = cseq[0].CodeMeaning.replace('Lead', '').replace('(Einthoven)', '').strip()
+        meaning = _lead_label(cseq[0])
 
         h = h_delta * numcol
         v = v_delta + row_height * SEPARATOR_V_RATIO

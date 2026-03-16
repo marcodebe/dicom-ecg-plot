@@ -67,3 +67,19 @@ DEFAULT_LAYOUT = {
 
 DEFAULT_WADOSERVER = "http://example.com"
 DEFAULT_INSTITUTION = None
+
+# Lead label lookup by DICOM CodeValue.
+# Covers MDC (ISO 11073) and SCPECG coding schemes used by common vendors.
+# Reference: DICOM PS3.16 Table D-1, ISO 11073-91064.
+LEAD_LABELS: dict[str, str] = {
+    # MDC / ISO 11073 codes
+    "2:1":  "I",    "2:2":  "II",   "2:3":  "III",
+    "2:4":  "aVR",  "2:5":  "aVL",  "2:6":  "aVF",
+    "2:7":  "V1",   "2:8":  "V2",   "2:9":  "V3",
+    "2:10": "V4",   "2:11": "V5",   "2:12": "V6",
+    # SCPECG codes (alternate scheme used by some vendors)
+    "5.4.5-1":  "I",    "5.4.5-2":  "II",   "5.4.5-3":  "III",
+    "5.4.5-4":  "aVR",  "5.4.5-5":  "aVL",  "5.4.5-6":  "aVF",
+    "5.4.5-7":  "V1",   "5.4.5-8":  "V2",   "5.4.5-9":  "V3",
+    "5.4.5-10": "V4",   "5.4.5-11": "V5",   "5.4.5-12": "V6",
+}
