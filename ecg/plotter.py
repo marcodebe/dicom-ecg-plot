@@ -39,6 +39,53 @@ except ImportError:
     from .constants import DEFAULT_INSTITUTION as INSTITUTION
 
 
+def _parse_dicom_date(value: str) -> str:
+    """Parse a DICOM DA value to a human-readable string.
+
+    Handles full (YYYYMMDD), partial (YYYYMM, YYYY), and empty values.
+    """
+    value = (value or '').strip()
+    formats = [('%Y%m%d', None), ('%Y%m', '%b %Y'), ('%Y', '%Y')]
+    for fmt, out in formats:
+        try:
+            dt = datetime.strptime(value, fmt)
+            if fmt == '%Y%m%d':
+                return f"{dt.day} {dt.strftime('%b %Y')}"
+            return dt.strftime(out)
+        except ValueError:
+            continue
+    return value
+
+
+def _parse_dicom_datetime(value: str) -> str:
+    """Parse a DICOM DT value (YYYYMMDDHHMMSS.FFFFFF&ZZXX) to a display string.
+
+    Strips optional fractional seconds and UTC offset before parsing.
+    """
+    value = (value or '').strip()
+    value = re.sub(r'\.\d+', '', value)       # remove fractional seconds
+    value = re.sub(r'[+-]\d{4}$', '', value)  # remove UTC offset
+    formats = [
+        ('%Y%m%d%H%M%S', '%d %b %Y %H:%M'),
+        ('%Y%m%d%H%M',   '%d %b %Y %H:%M'),
+        ('%Y%m%d',       '%d %b %Y'),
+    ]
+    for fmt, out in formats:
+        try:
+            return datetime.strptime(value, fmt).strftime(out)
+        except ValueError:
+            continue
+    return value
+
+
+def _parse_patient_age(value: str) -> str:
+    """Return a numeric age string from a DICOM AS value (e.g. '045Y' → '45')."""
+    value = (value or '').strip()
+    if value and value[-1] in ('Y', 'M', 'W', 'D'):
+        return str(int(value[:-1]))
+    return value
+
+
 def _lead_label(channel_source) -> str:
     """Return a short lead label from a ChannelSourceSequence item.
 
@@ -225,25 +272,11 @@ class ECGPlotter:
             pat_firstname = ''
 
         pat_name = ' '.join((pat_surname, pat_firstname.title())).strip()
-        pat_age = dicom.get('PatientAge', '').strip('Y')
+        pat_age = _parse_patient_age(dicom.get('PatientAge', ''))
         pat_id = dicom.get('PatientID', '')
         pat_sex = dicom.get('PatientSex', '')
-
-        try:
-            pat_bdate = datetime.strptime(
-                dicom.PatientBirthDate, '%Y%m%d'
-            ).strftime("%e %b %Y")
-        except (ValueError, AttributeError):
-            pat_bdate = ''
-
-        try:
-            acquisition_date_raw = re.sub(r'\.\d+$', '', dicom.AcquisitionDateTime)
-            acquisition_date = datetime.strftime(
-                datetime.strptime(acquisition_date_raw, '%Y%m%d%H%M%S'),
-                '%d %b %Y %H:%M',
-            )
-        except (ValueError, AttributeError):
-            acquisition_date = ''
+        pat_bdate = _parse_dicom_date(dicom.get('PatientBirthDate', ''))
+        acquisition_date = _parse_dicom_datetime(dicom.get('AcquisitionDateTime', ''))
 
         return (
             f"{pat_name}\n"
