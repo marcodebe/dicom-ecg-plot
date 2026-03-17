@@ -19,7 +19,7 @@ except ImportError:
     from .constants import DEFAULT_LAYOUT as LAYOUT
 
 from .constants import DEFAULT_PAPER
-from .reader import DicomECGReader, ECGReadFileError
+from .reader import DicomECGReader
 from .processor import extract_signals
 from .plotter import ECGPlotter
 

@@ -1,3 +1,2 @@
-from .ecg import ECG
-from .reader import ECGReadFileError
-from . import i18n
+from .ecg import ECG as ECG
+from .reader import ECGReadFileError as ECGReadFileError
