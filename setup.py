@@ -17,7 +17,7 @@ setuptools.setup(
         long_description_content_type="text/markdown",
         author='Marco De Benedetto',
         author_email='debe@galliera.it',
-        url='https://github.com/marcodebe/dicomecg_convert',
+        url='https://github.com/marcodebe/dicom-ecg-plot',
         packages=setuptools.find_packages(),
         scripts=['dicom-ecg-plot'],
         install_requires=[
@@ -27,9 +27,8 @@ setuptools.setup(
             'docopt',
             'requests',
             ],
+        license='MIT',
         classifiers=[
-            'License :: OSI Approved :: MIT License',
-            'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
             'Topic :: Scientific/Engineering :: Medical Science Apps.',
             'Intended Audience :: Healthcare Industry',
