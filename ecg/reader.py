@@ -67,7 +67,11 @@ class DicomECGReader:
             'objectUID': source['obj'],
         }
         headers = {'content-type': 'application/json'}
-        resp = requests.get(WADOSERVER, params=payload, headers=headers)
+        try:
+            resp = requests.get(WADOSERVER, params=payload, headers=headers, timeout=30)
+            resp.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise ECGReadFileError(f"WADO request failed: {e}")
         return io.BytesIO(resp.content)
 
     # ------------------------------------------------------------------

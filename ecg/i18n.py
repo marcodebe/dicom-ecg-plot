@@ -4,7 +4,7 @@ import locale
 import gettext
 
 APP_NAME = "ecg"
-LOCAL_PATH = 'locale/'
+LOCAL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'locale')
 
 def get_lang():
     langs = []

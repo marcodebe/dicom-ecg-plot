@@ -63,6 +63,16 @@ class ECG:
         """
         return self._plotter.save(outputfile, outformat)
 
-    def __del__(self):
+    def close(self) -> None:
+        """Release matplotlib resources."""
         if hasattr(self, '_plotter'):
             self._plotter.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+    def __del__(self):
+        self.close()

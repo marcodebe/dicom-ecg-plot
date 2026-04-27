@@ -182,6 +182,10 @@ class ECGPlotter:
     def _plot_signals(self, layoutid, mm_mv):
         """Plot all signal chunks according to the requested layout."""
         self.mm_mv = mm_mv
+        if layoutid not in self.layout_config:
+            raise ValueError(
+                f"Unknown layout '{layoutid}'. Valid options: {list(self.layout_config)}"
+            )
         layout = self.layout_config[layoutid]
         rows = len(layout)
 
@@ -222,8 +226,8 @@ class ECGPlotter:
             zorder=10,
         )
 
-        cseq = self.reader.channel_definitions[signum].ChannelSourceSequence
-        meaning = _lead_label(cseq[0])
+        cseq = getattr(self.reader.channel_definitions[signum], 'ChannelSourceSequence', None)
+        meaning = _lead_label(cseq[0]) if cseq else f"Ch{signum + 1}"
 
         h = h_delta * numcol
         v = v_delta + row_height * SEPARATOR_V_RATIO
@@ -266,9 +270,9 @@ class ECGPlotter:
         dicom = self.reader.dicom
 
         try:
-            pat_surname, pat_firstname = str(dicom.PatientName).split('^')
+            pat_surname, pat_firstname = str(dicom.get('PatientName', '')).split('^')
         except ValueError:
-            pat_surname = str(dicom.PatientName)
+            pat_surname = str(dicom.get('PatientName', ''))
             pat_firstname = ''
 
         pat_name = ' '.join((pat_surname, pat_firstname.title())).strip()

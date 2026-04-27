@@ -43,14 +43,15 @@ def extract_signals(reader: DicomECGReader) -> np.ndarray:
         if definition.get('ChannelSensitivity'):
             factor[idx] = (
                 float(definition.ChannelSensitivity) *
-                float(definition.ChannelSensitivityCorrectionFactor)
+                float(getattr(definition, 'ChannelSensitivityCorrectionFactor', 1.0))
             )
 
         if definition.get('ChannelBaseline'):
             baseln[idx] = float(definition.ChannelBaseline)
 
+        units_seq = getattr(definition, 'ChannelSensitivityUnitsSequence', None)
         units.append(
-            definition.ChannelSensitivityUnitsSequence[0].CodeValue
+            units_seq[0].CodeValue if units_seq else 'uV'
         )
 
     unpack_fmt = f'<{int(len(reader.waveform_data) / 2)}h'
