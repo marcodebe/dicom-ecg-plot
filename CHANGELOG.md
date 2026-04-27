@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [1.4.1] — 2026-04-28
+
+### Fixed
+- `processor.py`: `ChannelSensitivityCorrectionFactor` tag now accessed with a safe fallback (`1.0`) instead of a bare attribute access that would crash on non-standard DICOM files
+- `processor.py`: `ChannelSensitivityUnitsSequence` now handled with a fallback to `'uV'` when the sequence is absent
+- `plotter.py`: `ChannelSourceSequence` now accessed safely; missing sequence falls back to a generic label (`Ch{n}`)
+- `plotter.py`: `PatientName` tag now read via `dicom.get()` to avoid `AttributeError` on files where the tag is absent
+- `plotter.py`: invalid layout ID now raises a clear `ValueError` instead of a cryptic `KeyError`
+- `reader.py`: WADO requests now include a 30 s timeout and call `raise_for_status()`, with a readable error message on failure
+- `ecg.py`: added public `close()` method and context manager support (`with ECG(...) as ecg:`)
+- `dicom-ecg-plot`: removed Python 2 stdout fallback (project is Python 3 only)
+- `i18n.py`: locale path is now absolute and relative to the module file, independent of the working directory
+
 ### Documentation
 - Rewrote README in English: added About section, Features list, options table, layout table, configuration section, and authors
 
@@ -103,7 +118,8 @@ Major refactor: the monolithic `ECG` class has been split into focused modules a
 - **2014** — Optional automated interpretation text (`--interpretation`); i18n/l10n support
 - **2013** — Initial release: DICOM waveform decoding, 3×4+1 / 3×4 / 6×2 layouts, WADO retrieval, Butterworth lowpass filter, configurable institution name, multiple output formats
 
-[Unreleased]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.4.0...HEAD
+[Unreleased]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.4.1...HEAD
+[1.4.1]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.4.0...v1.4.1
 [1.4.0]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.3.5...v1.4.0
 [1.3.5]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.3.3...v1.3.5
 [1.3.3]: https://gitlab.galliera.it/debe/dicom-ecg-plot/-/compare/v1.3.0...v1.3.3
