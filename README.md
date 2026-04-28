@@ -97,6 +97,51 @@ Custom layouts can be added to `ecgconfig.py` by extending the `LAYOUT` dictiona
 
 ---
 
+## Python API
+
+The `ECG` class can be used directly in Python scripts. It supports the context manager protocol for automatic resource cleanup.
+
+```python
+from ecg import ECG
+
+# Convert a local DICOM file to PNG
+with ECG('anonymous_ecg.dcm') as ecg:
+    ecg.draw('3x4_1')
+    ecg.save('anonymous_ecg.png')
+```
+
+```python
+# Render to bytes (e.g. for a web response or in-memory processing)
+with ECG('anonymous_ecg.dcm') as ecg:
+    ecg.draw('3x4_1')
+    png_bytes = ecg.save(outformat='png')
+```
+
+```python
+# Custom layout, letter paper, minor grid
+with ECG('anonymous_ecg.dcm', paper='letter') as ecg:
+    ecg.draw('6x2', mm_mv=10, minor_axis=True)
+    ecg.save('anonymous_ecg.pdf')
+```
+
+```python
+# WADO retrieval from a PACS
+with ECG({'stu': '<studyUID>', 'ser': '<seriesUID>', 'obj': '<objectUID>'}) as ecg:
+    ecg.draw('3x4_1', interpretation=True)
+    ecg.save('anonymous_ecg.pdf')
+```
+
+`ECG.draw()` parameters:
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `layoutid` | `str` | — | Layout key: `3x4_1`, `3x4`, `6x2`, `12x1` |
+| `mm_mv` | `float` | `10.0` | Amplitude scale in mm/mV |
+| `minor_axis` | `bool` | `False` | Draw 1 mm minor grid |
+| `interpretation` | `bool` | `False` | Show automated interpretation text |
+
+---
+
 ## Examples
 
 ```bash
